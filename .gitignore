@@ -3,4 +3,11 @@ screenshots/
 .DS_Store
 Thumbs.db
 .vercel
-CLAUDE.md
+
+# 내부 작업 문서 — 클라이언트 인도(소스 압축 전달 또는 클라이언트 GitHub 이관) 시 절대 노출 금지
+CLAUDE*.md
+NOTES.md
+TODO.md
+*_internal.md
+.claude/
+.gstack/
