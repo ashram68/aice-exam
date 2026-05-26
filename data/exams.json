@@ -3,10 +3,10 @@
     {
       "id": "exam-01",
       "title": "1회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "Titanic 데이터셋 기반 14문항.\nEDA, 전처리, 머신러닝, 딥러닝 모델링.",
-      "questionCount": 14,
-      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-mock-exam-demo/blob/main/data/exam-01/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_1%ED%9A%8C_Titanic.ipynb",
+      "subtitle": "타이타닉 생존 예측 (이진 분류)",
+      "description": "Titanic 데이터셋 기반 15문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 15,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-01/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_1%ED%9A%8C_Titanic.ipynb",
       "lectureUrl": "#",
       "enabled": true
     },

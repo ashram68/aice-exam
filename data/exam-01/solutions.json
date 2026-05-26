@@ -1,262 +1,335 @@
 {
   "examId": "exam-01",
-  "title": "타이타닉 데이터 분석 모의고사 (14문항)",
+  "title": "AICE Associate 모의고사 1회 — 타이타닉 생존 예측",
+  "subtitle": "이진 분류 (Binary Classification) · 100점 · 15문항",
   "dataset": "titanic.csv",
-  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport matplotlib.font_manager as fm\nplt.rc('font', family='NanumGothicCoding')\nimport warnings\nwarnings.filterwarnings('ignore')\n\ndf = pd.read_csv('titanic.csv')",
+  "domain": "운송 / 안전 (Transportation & Safety)",
+  "targetVariable": "Survived (0=사망, 1=생존)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 20, "range": "Q1~Q4"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q5~Q9"},
+    {"name": "AI 모델링", "points": 50, "range": "Q10~Q15"}
+  ],
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('./titanic.csv')",
   "questions": [
     {
       "id": 1,
-      "title": "Gender(성별) 분포 countplot 그래프",
-      "category": "시각화",
-      "type": "mcq",
+      "title": "pandas 라이브러리 불러오기",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
       "problem": [
-        "대상 데이터프레임: df",
-        "seaborn을 활용하세요",
-        "x축에 Gender를 표시하세요",
-        "출력된 그래프를 보고 옳지 않은 선택지를 골라 답안01 변수에 저장하세요"
+        "pandas를 사용할 수 있게 별칭(alias)을 pd로 해서 불러오세요."
       ],
-      "choices": [
-        "male이 female보다 많다",
-        "female 승객 수는 400명 이상이다",
-        "male 승객 수는 500명 이상이다",
-        "전체 승객 중 male이 더 많은 비율을 차지한다"
-      ],
-      "answer": "2",
-      "answerDisplay": "② female 승객 수는 400명 이상이다",
-      "code": "import seaborn as sns\nsns.countplot(data=df, x='Gender')\nplt.show()\n\n답안01 = 2",
-      "explanation": "male 577명, female 314명으로 female은 400명 미만입니다. 따라서 ②가 옳지 않은 설명입니다.",
-      "tip": null
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "import pandas as pd",
+      "code": "import pandas as pd",
+      "explanation": "import 라이브러리 as 별칭 문법. AICE 시험은 항상 1번 문제로 가장 기본적인 import를 출제합니다. 자주 사용되는 alias: pandas→pd, numpy→np, sklearn→sk, seaborn→sns, matplotlib.pyplot→plt.",
+      "tip": "자주 나오는 오답: 'import pandas pd' (as 누락), 'import pd as pandas' (순서 반대)."
     },
     {
       "id": 2,
-      "title": "Age와 Fare의 관계 jointplot 그래프",
-      "category": "시각화",
+      "title": "데이터 파일(titanic.csv) 읽어오기",
+      "category": "데이터 분석",
+      "points": 5,
       "type": "code",
       "problem": [
-        "대상 데이터프레임: df",
-        "seaborn 활용",
-        "x축: Age, y축: Fare"
+        "pandas로 데이터 파일을 읽어온 뒤, 데이터프레임 변수명 df에 할당하고 첫 5개 행을 출력하세요.",
+        "데이터프레임 변수명: df",
+        "데이터 파일명: titanic.csv",
+        "csv 파일은 본 문제/답안지와 동일한 경로에 있습니다."
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": null,
-      "code": "import seaborn as sns\nsns.jointplot(data=df, x='Age', y='Fare')\nplt.show()",
-      "explanation": "Age와 Fare의 관계 및 각 변수의 분포를 동시에 확인할 수 있습니다. jointplot은 산점도와 히스토그램을 동시에 보여줍니다.",
-      "tip": null
+      "answerDisplay": "df = pd.read_csv('./titanic.csv'); df.head(5)",
+      "code": "df = pd.read_csv('./titanic.csv')\ndf.head(5)",
+      "explanation": "pd.read_csv()로 CSV 파일을 읽습니다. './파일명'은 현재 디렉토리(생략 가능: 'titanic.csv'). df.head(n): 첫 n개 행 출력 (기본값 5). df.tail(n): 마지막 n개 행 출력. df.shape: (행, 열) 크기 확인.",
+      "tip": "자주 나오는 오답: 'pd.read_csv(titanic.csv)' (따옴표 누락), 'df = read_csv(...)' (pd. 누락)."
     },
     {
       "id": 3,
-      "title": "이상치 제거 및 불필요한 열 삭제",
-      "category": "데이터 전처리",
+      "title": "객실 등급(Pclass)별 생존 분포 countplot",
+      "category": "데이터 분석",
+      "points": 5,
       "type": "code",
+      "prerequisiteCode": "import numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False",
       "problem": [
-        "Fare(운임) 500 초과하는 이상치 행을 삭제하세요",
-        "'PassengerId', 'Ticket', 'Name', 'Cabin' 컬럼을 삭제하세요",
-        "전처리 결과를 df_temp에 저장하세요"
+        "(3-1) seaborn의 countplot으로 객실 등급별 생존자 수 분포를 그래프로 그리세요.",
+        "대상 데이터프레임: df",
+        "X축: Pclass, hue(색상 구분): Survived",
+        "(3-2) 출력된 그래프에서 생존율이 가장 높았던 객실 등급(Pclass)은 몇 등급인가요?"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df_temp.shape → (888, 8)",
-      "code": "df_temp = df[df['Fare'] <= 500].drop(\n    columns=['PassengerId', 'Ticket', 'Name', 'Cabin'])\nprint(df_temp.shape)   # (888, 8)",
-      "explanation": "Fare 500 초과 행 3개가 삭제됩니다. '초과하지 않은' 조건이므로 <= 500 (작거나 같다)을 사용합니다.",
-      "tip": "'초과'와 '이상'의 차이에 주의하세요. 500 초과 = >500, 500 이상 = >=500"
+      "answerDisplay": "(3-1) countplot 시각화 / (3-2) 1 (1등급)",
+      "code": "# (3-1) countplot 시각화\nsns.countplot(data=df, x='Pclass', hue='Survived')\nplt.show()\n\n# (3-2) 답안: 1 (1등급)\n# → 1등급 객실의 생존자가 사망자보다 많은 유일한 등급",
+      "explanation": "countplot은 범주형 데이터의 빈도(개수)를 막대그래프로 표시합니다. hue 옵션으로 범주별 색상 구분 가능. 분석 결과: 1등급(Pclass=1)은 생존율 약 63%, 2등급은 약 47%, 3등급은 약 24%. 객실 등급이 높을수록 생존율이 높았으며, 사회경제적 지위가 생존에 큰 영향을 미쳤음을 시사합니다.",
+      "tip": "자주 나오는 오답: 'data=df' 명시 안 함, countplot 대신 barplot 사용(목적 다름). 1등급이 생존자 > 사망자인 유일한 등급입니다."
     },
     {
       "id": 4,
-      "title": "컬럼 간 상관관계 분석",
+      "title": "Age-Fare 관계 scatterplot + Survived hue",
       "category": "데이터 분석",
-      "type": "mcq",
+      "points": 5,
+      "type": "code",
       "problem": [
-        "대상 데이터프레임: df_temp",
-        "아래 코드의 빈칸 <blank1>을 채우세요",
-        "<blank1> 값을 답안04_1 변수에 저장하세요",
-        "Survived 컬럼과 상관관계가 가장 높은 컬럼을 답안04_2 변수에 저장하세요"
+        "seaborn의 scatterplot으로 두 컬럼 간의 관계를 그래프로 그리세요.",
+        "대상 데이터프레임: df",
+        "X축: Age, Y축: Fare",
+        "Survived를 hue로 구분하여 표시하세요"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "답안04_1 = 'corr()', 답안04_2 = 'Pclass'",
-      "code": "column_list = ['Survived','Pclass','Age','SibSp','Parch','Fare']\ncorr_table = df_temp[column_list].corr()\nprint(corr_table)\n\ncorr_table['Survived'].drop('Survived').abs().idxmax()\n\n답안04_1 = 'corr()'\n답안04_2 = 'Pclass'   # 상관계수 0.334로 가장 높음",
-      "explanation": "Survived와의 상관관계 순위: Pclass(0.334) > Fare(0.262) > Parch(0.082) > Age(0.079) > SibSp(0.033). corr() 함수는 수치형 컬럼 간의 피어슨 상관계수를 계산합니다.",
-      "tip": "corr()는 -1~1 사이 값을 반환합니다. 절대값이 클수록 상관관계가 강합니다."
+      "answerDisplay": "sns.scatterplot(data=df, x='Age', y='Fare', hue='Survived')",
+      "code": "sns.scatterplot(data=df, x='Age', y='Fare', hue='Survived')\nplt.show()",
+      "explanation": "scatterplot은 두 수치형 변수의 관계를 시각화합니다. hue로 세 번째 변수(범주형) 추가 가능. relplot, lmplot도 유사 기능. 분석 결과: 고운임(>100) 구간은 생존자 비율 매우 높음, 저운임(<30) 구간은 사망자 밀도 높음. 운임이 생존에 강한 영향(객실 등급과 강한 상관). 나이 단독으로는 생존과 약한 관계.",
+      "tip": null
     },
     {
       "id": 5,
-      "title": "결측치 확인 및 처리",
+      "title": "AI 모델링에 불필요한 컬럼 삭제 (data_temp)",
       "category": "데이터 전처리",
-      "type": "mcq",
+      "points": 5,
+      "type": "code",
       "problem": [
-        "대상 데이터프레임: df_temp",
-        "각 컬럼의 결측치 개수를 확인하세요",
-        "결측치가 있는 행을 삭제하여 df_na에 저장하세요",
-        "결측치 총 개수를 답안05 변수에 저장하세요"
+        "아래 가이드에 따라 컬럼을 삭제하세요.",
+        "대상 데이터프레임: df",
+        "삭제 대상: PassengerId(단순 식별자), Name(이름), Ticket(티켓 번호), Cabin(결측치가 너무 많음)",
+        "결과를 data_temp라는 변수명으로 저장하세요",
+        "data_temp의 컬럼 개수를 출력하세요"
       ],
       "choices": null,
-      "answer": "179",
-      "answerDisplay": "답안05 = 179",
-      "code": "# 결측치 확인\nprint(df_temp.isnull().sum())\n# Age: 177개, Embarked: 2개\n\n# 결측치 행 삭제\ndf_na = df_temp.dropna()\n\n# 결측치 총 개수\n답안05 = 179",
-      "explanation": "Age 컬럼에 177개, Embarked 컬럼에 2개, 총 179개의 결측치가 있습니다. dropna()는 결측치가 포함된 모든 행을 삭제합니다.",
-      "tip": "isnull().sum()으로 컬럼별 결측치를 확인한 뒤 처리 전략을 결정합니다."
+      "answer": null,
+      "answerDisplay": "data_temp: 컬럼 8개 (Survived, Pclass, Gender, Age, SibSp, Parch, Fare, Embarked)",
+      "code": "data_temp = df.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1)\nprint('컬럼 개수:', len(data_temp.columns))\nprint('남은 컬럼:', list(data_temp.columns))",
+      "explanation": "df.drop(컬럼리스트, axis=1): 컬럼 삭제. axis=0(행 삭제), axis=1(열 삭제). Cabin은 결측치가 매우 많음(687/891), 식별자 컬럼들은 모델 학습에 도움 안 됨. inplace=True도 사용 가능하나 새 변수에 저장하는 방식이 더 안전합니다.",
+      "tip": "자주 나오는 오답: 리스트로 묶지 않음 (df.drop('A', 'B', ...)), axis 잘못 지정 (axis=0 → 행 삭제로 오류)."
     },
     {
       "id": 6,
-      "title": "불필요한 변수 삭제",
+      "title": "결측치 처리 오류 정정 (Age 중앙값 / Embarked 최빈값)",
       "category": "데이터 전처리",
+      "points": 6,
       "type": "code",
       "problem": [
-        "대상 데이터프레임: df_na",
-        "'SibSp', 'Parch' 2개 컬럼을 삭제하세요",
-        "전처리 결과를 df_del에 저장하세요"
+        "(6-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상 데이터프레임: data_temp",
+        "Age 컬럼의 결측치는 중앙값(median)으로 채우세요",
+        "Embarked 컬럼의 결측치는 최빈값(mode)으로 채우세요",
+        "전처리가 반영된 데이터프레임은 그대로 data_temp에 저장하세요",
+        "오류 코드 원본:",
+        "data_temp['Age'].fillna(data_temp['Age'].mean()) — mean → median 으로 수정",
+        "data_temp['Embarked'].fillna(data_temp['Embarked'].mode()) — mode() → mode()[0] 로 수정",
+        "(6-2) Age 컬럼의 중앙값은 얼마인가요?"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df_del.shape → (709, 6)",
-      "code": "df_del = df_na.drop(columns=['SibSp', 'Parch'])\nprint(df_del.shape)   # (709, 6)",
-      "explanation": "drop(columns=[])을 사용하면 여러 열을 한 번에 삭제할 수 있습니다. SibSp(형제/배우자 수)와 Parch(부모/자녀 수)를 제거합니다.",
-      "tip": null
+      "answerDisplay": "(6-1) median() / mode()[0]로 정정 / (6-2) 28.0",
+      "code": "# (6-1) 오류 정정\nprint('결측치 처리 전\\n', data_temp.isnull().sum())\ndata_temp['Age'] = data_temp['Age'].fillna(data_temp['Age'].median())\ndata_temp['Embarked'] = data_temp['Embarked'].fillna(data_temp['Embarked'].mode()[0])\nprint('\\n결측치 처리 후\\n', data_temp.isnull().sum())\n\n# (6-2) 답안: 28.0",
+      "explanation": "결측치 처리 핵심: mean()은 이상치에 민감해서 정규분포일 때 적합, median()은 강건(robust)해서 이상치가 있을 때 적합, mode()[0]은 범주형 변수에 적합(반드시 [0] 필요). mode()는 Series를 반환(최빈값이 여러 개일 수 있어서) — 반드시 mode()[0]으로 첫 번째 값을 추출해야 fillna가 제대로 동작합니다.",
+      "tip": "mode()[0]의 [0]을 자주 빠뜨리는 시험 단골 출제 포인트. 시험 빈출 패턴: 컬럼 dtype별 차등 처리 (object → mode()[0], 수치형 → mean/median)."
     },
     {
       "id": 7,
-      "title": "원-핫 인코딩",
+      "title": "원-핫 인코딩 (get_dummies + drop_first)",
       "category": "데이터 전처리",
+      "points": 6,
       "type": "code",
       "problem": [
-        "대상 데이터프레임: df_del",
-        "원-핫 인코딩 대상: object 타입 전체 컬럼",
-        "활용 함수: pandas의 get_dummies()",
-        "결과를 df_preset에 저장하세요"
+        "아래 가이드에 따라 범주형 데이터를 이진형 벡터로 변환하세요.",
+        "대상 데이터프레임: data_temp",
+        "원-핫 인코딩 대상: 'Gender', 'Embarked'",
+        "다중공선성 방지를 위해 drop_first 옵션 적용",
+        "결과를 data_preset 변수에 저장",
+        "info() 함수로 컬럼 변환 검증",
+        "빈칸 코드: data_preset = pd.<#7-1>(data=data_temp, <#7-2>=['Gender', 'Embarked'], drop_first=True)",
+        "(7-1) 첫 번째 빈칸에 들어갈 함수명은?",
+        "(7-2) 두 번째 빈칸에 들어갈 옵션명은?"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df_preset.shape → (709, 9)",
-      "code": "df_preset = pd.get_dummies(df_del)\nprint(df_preset.shape)   # (709, 9)",
-      "explanation": "Gender와 Embarked 열이 원-핫 인코딩 변환 대상입니다. object 타입 컬럼이 자동으로 이진(0/1) 컬럼으로 변환됩니다.",
-      "tip": "get_dummies()는 기본적으로 object/category 타입 컬럼만 변환합니다."
+      "answerDisplay": "(7-1) get_dummies / (7-2) columns",
+      "code": "data_preset = pd.get_dummies(\n    data=data_temp,\n    columns=['Gender', 'Embarked'],\n    drop_first=True\n)\ndata_preset.info()\n\n# 답안\n# (7-1) get_dummies\n# (7-2) columns",
+      "explanation": "columns=[...]: 지정 컬럼만 원-핫 인코딩. drop_first=True: 첫 번째 더미 변수 제거(다중공선성 방지). N개 범주 → N-1개 더미면 충분(N번째는 나머지 0으로 추론 가능). 트리 기반 모델에서는 큰 차이 없지만, 선형 모델/딥러닝에서는 중요합니다.",
+      "tip": "자주 나오는 오답: 존재하지 않는 'pd.one_hot_encoding(...)', drop_first 누락, 'column'(s 누락)."
     },
     {
       "id": 8,
-      "title": "훈련/검증 데이터셋 분리 및 스케일링",
-      "category": "모델링 준비",
+      "title": "훈련/검증 데이터셋 분리 (train_test_split)",
+      "category": "데이터 전처리",
+      "points": 6,
       "type": "code",
       "problem": [
-        "Survived → label값 y, 나머지 → feature값 X",
-        "훈련:검증 = 80:20, random_state=42",
-        "RobustScaler로 스케일링",
-        "훈련 Feature: fit_transform → X_train",
-        "검증 Feature: transform → X_valid"
+        "Survived 컬럼을 레이블 y로, 나머지 컬럼을 피처 X로 할당한 후 분리하세요.",
+        "대상 데이터프레임: data_preset",
+        "훈련 레이블: y_train, 훈련 피처: X_train",
+        "검증 레이블: y_valid, 검증 피처: X_valid",
+        "훈련/검증 비율: 80:20",
+        "stratify 옵션으로 생존여부 비율 동일하게 유지",
+        "난수 시드: 42",
+        "sklearn의 train_test_split 활용"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "X_train: (567, 8), X_valid: (142, 8)",
-      "code": "from sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import RobustScaler\n\ny = df_preset['Survived']\nX = df_preset.drop(columns=['Survived'])\n\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y, test_size=0.2, random_state=42)\n\nscaler = RobustScaler()\nX_train = scaler.fit_transform(X_train)   # (567, 8)\nX_valid = scaler.transform(X_valid)       # (142, 8)",
-      "explanation": "fit_transform()은 훈련 데이터에만 적용합니다. transform()은 훈련 데이터 기준으로 검증 데이터를 변환합니다. RobustScaler는 중앙값과 IQR을 사용하여 이상치에 강건합니다.",
-      "tip": "검증 데이터에 fit_transform()을 사용하면 데이터 누수(data leakage)가 발생합니다."
+      "answerDisplay": "test_size=0.2, random_state=42, stratify=y",
+      "code": "from sklearn.model_selection import train_test_split\n\nX = data_preset.drop('Survived', axis=1)\ny = data_preset['Survived']\n\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y,\n    test_size=0.2,\n    random_state=42,\n    stratify=y\n)\nprint(f'Train: {X_train.shape}, Valid: {X_valid.shape}')",
+      "explanation": "test_size=0.2(검증 20%), random_state=42(재현성 보장), stratify=y(y의 클래스 비율을 train/valid에 동일하게 유지). 분류 문제에서 클래스 불균형 시 stratify는 필수. Titanic은 사망(0)이 약 62%, 생존(1)이 약 38%로 불균형이라 stratify 없으면 train/valid 비율이 어긋날 수 있음.",
+      "tip": "반환 순서 주의: X_train, X_valid, y_train, y_valid (X끼리, y끼리 묶이는 게 아니라 X→y 순서가 두 번 반복)."
     },
     {
       "id": 9,
-      "title": "Embarked(탑승항구) 분포 countplot",
-      "category": "시각화",
-      "type": "mcq",
+      "title": "StandardScaler 오류 정정 (fit_transform vs transform)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
       "problem": [
-        "대상 데이터프레임: df_na",
-        "seaborn 활용",
-        "가장 많은 탑승항구를 답안09 변수에 저장하세요"
+        "(9-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "sklearn.preprocessing의 StandardScaler를 import",
+        "ss = StandardScaler() 변수에 지정",
+        "훈련 데이터에 fit_transform 적용",
+        "검증 데이터에 학습된 기준 그대로 transform 적용 (fit하지 말 것!)",
+        "검증 데이터 최댓값을 반올림",
+        "오류 코드: X_valid = ss.fit_transform(X_valid) — fit_transform → transform 으로 수정",
+        "(9-2) StandardScaler 적용 후 검증 데이터의 최댓값을 반올림한 결과는?"
       ],
       "choices": null,
-      "answer": "S",
-      "answerDisplay": "답안09 = 'S'",
-      "code": "import seaborn as sns\nsns.countplot(data=df_na, x='Embarked')\nplt.show()\n\n답안09 = 'S'",
-      "explanation": "S(Southampton) 554명 > C(Cherbourg) 127명 > Q(Queenstown) 28명. Southampton이 가장 많은 탑승 항구입니다.",
-      "tip": null
+      "answer": null,
+      "answerDisplay": "(9-1) X_valid는 transform만 / (9-2) 10",
+      "code": "from sklearn.preprocessing import StandardScaler\nss = StandardScaler()\nX_train = ss.fit_transform(X_train)\nX_valid = ss.transform(X_valid)\nround(np.max(X_valid))\n\n# 답안\n# (9-2) 10  (X_valid_scaled 최댓값 약 10.005, 반올림 시 10)",
+      "explanation": "fit(): 평균/표준편차 등 학습 → 훈련 데이터만. transform(): 학습된 기준으로 변환만 → 검증/테스트/새로운 데이터. fit_transform(): fit+transform 동시 → 훈련 데이터만. 검증 데이터에 fit_transform 쓰면 학습된 기준이 무시되어 데이터 누수(leakage) 발생.",
+      "tip": "핵심 원칙: 훈련 → fit_transform, 검증/테스트/새 데이터 → transform (절대 fit하지 말 것!). StandardScaler(평균0/표준편차1), MinMaxScaler(0~1), RobustScaler(중앙값/IQR — 이상치 많을 때)."
     },
     {
       "id": 10,
-      "title": "Pclass별 Fare 평균 피벗 테이블",
-      "category": "데이터 분석",
+      "title": "DecisionTree + RandomForest 모델 생성 및 학습",
+      "category": "AI 모델링",
+      "points": 8,
       "type": "code",
       "problem": [
-        "대상 데이터프레임: df_na",
-        "index: Pclass, values: Fare, aggfunc: mean",
-        "결과를 pivot 변수에 저장하세요"
+        "(10-1) DecisionTree 모델 하이퍼파라미터 설정 후 dt 변수에 저장하고 fit 학습",
+        "max_depth=5, min_samples_split=3, min_samples_leaf=2, random_state=42",
+        "(10-2) RandomForest 모델 하이퍼파라미터 설정 후 rf 변수에 저장하고 fit 학습",
+        "n_estimators=100, max_depth=5, min_samples_split=3, min_samples_leaf=2, random_state=42"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "Pclass 1 = 81.02, Pclass 2 = 21.47, Pclass 3 = 13.23",
-      "code": "pivot = pd.pivot_table(df_na,\n                       values='Fare',\n                       index='Pclass',\n                       aggfunc='mean').round(2)\nprint(pivot)",
-      "explanation": "객실 등급이 높을수록(숫자가 작을수록) 운임 평균이 높습니다. 1등석 81.02, 2등석 21.47, 3등석 13.23.",
-      "tip": "pivot_table의 aggfunc에는 'mean', 'sum', 'count', 'max', 'min' 등을 사용할 수 있습니다."
+      "answerDisplay": "DecisionTreeClassifier + RandomForestClassifier 학습 완료",
+      "code": "# (10-1) DecisionTree\nfrom sklearn.tree import DecisionTreeClassifier\ndt = DecisionTreeClassifier(\n    max_depth=5,\n    min_samples_split=3,\n    min_samples_leaf=2,\n    random_state=42\n)\ndt.fit(X_train, y_train)\n\n# (10-2) RandomForest\nfrom sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(\n    n_estimators=100,\n    max_depth=5,\n    min_samples_split=3,\n    min_samples_leaf=2,\n    random_state=42\n)\nrf.fit(X_train, y_train)",
+      "explanation": "트리 기반 하이퍼파라미터: max_depth(트리 최대 깊이, 클수록 복잡), min_samples_split(분할 최소 샘플, 클수록 단순), min_samples_leaf(리프 최소 샘플, 과적합 방지), n_estimators(RF 트리 개수, 클수록 안정), random_state(재현성 시드).",
+      "tip": "분류용은 Classifier, 회귀용은 Regressor. 자주 헷갈림 — DecisionTreeClassifier vs DecisionTreeRegressor, RandomForestClassifier vs RandomForestRegressor."
     },
     {
       "id": 11,
-      "title": "의사결정나무 & 랜덤포레스트 모델 학습",
-      "category": "머신러닝",
+      "title": "RandomForest 변수중요도 분석 및 시각화",
+      "category": "AI 모델링",
+      "points": 7,
       "type": "code",
       "problem": [
-        "의사결정나무: max_depth=5, min_samples_split=3, random_state=120 → dt 변수 저장",
-        "랜덤포레스트: max_depth=5, min_samples_split=3, random_state=120 → rf 변수 저장",
-        "훈련 데이터셋으로 학습"
+        "(11-1) rf의 변수중요도(feature_importances_)와 X.columns를 매핑",
+        "DataFrame 변수명: fi, 컬럼명: 'feature', 'importance'",
+        "importance 기준 내림차순 정렬",
+        "seaborn barplot으로 시각화 (X축: importance, Y축: feature)",
+        "palette='viridis' 옵션 사용",
+        "(11-2) 출력된 그래프에서 가장 높은 중요도를 보이는 변수명은?"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": null,
-      "code": "from sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\ndt = DecisionTreeClassifier(\n    max_depth=5, min_samples_split=3, random_state=120)\nrf = RandomForestClassifier(\n    max_depth=5, min_samples_split=3, random_state=120)\n\ndt.fit(X_train, y_train)\nrf.fit(X_train, y_train)",
-      "explanation": "Survived는 0/1 이진분류이므로 Classifier를 사용합니다. Regressor가 아닌 Classifier를 선택하는 것이 핵심입니다.",
-      "tip": "max_depth는 과적합 방지, min_samples_split은 노드 분할 최소 샘플 수를 조절합니다."
+      "answerDisplay": "(11-1) feature_importances_ 시각화 / (11-2) Gender_male",
+      "code": "# (11-1)\nfi = pd.DataFrame({\n    'feature': X.columns,\n    'importance': rf.feature_importances_\n})\nfi = fi.sort_values('importance', ascending=False)\nsns.barplot(x='importance', y='feature', data=fi, palette='viridis')\nplt.title('Feature Importance')\nplt.show()\n\n# (11-2) 답안: Gender_male\n# (실행 환경에 따라 Fare 또는 Pclass가 1위일 수도 있음)",
+      "explanation": "Gender_male이 가장 높은 중요도 → 성별이 생존에 가장 큰 영향. Fare/Pclass: 두 번째 그룹(사회경제적 지위). Age: 중간. SibSp/Parch: 가족 동반 관련, 낮음. Embarked: 거의 영향 없음. '여성과 아이 먼저' 원칙이 실제로 작동했음을 데이터가 입증합니다.",
+      "tip": "rf.feature_importances_ — 끝에 underscore 필수! 'feature_importance'(단수) 또는 'importances'(끝 _ 없음)는 오답. sort_values()는 값 기준, sort_index()는 인덱스 기준."
     },
     {
       "id": 12,
-      "title": "모델 성능 평가 (MAE)",
-      "category": "머신러닝",
-      "type": "mcq",
+      "title": "DT/RF 모델 평가 (Accuracy + F1 + Confusion Matrix)",
+      "category": "AI 모델링",
+      "points": 9,
+      "type": "code",
       "problem": [
-        "검증 데이터셋 활용",
-        "dt 예측 → y_pred_dt, MAE → dt_mae",
-        "rf 예측 → y_pred_rf, MAE → rf_mae",
-        "성능 좋은 모델을 답안12 변수에 저장하세요"
+        "(12-1) 검증데이터셋(X_valid, y_valid)으로 두 모델 평가",
+        "y_pred_dt = dt.predict(X_valid), dt_acc/dt_f1 산출",
+        "y_pred_rf = rf.predict(X_valid), rf_acc/rf_f1 산출",
+        "2개 모델의 Accuracy와 F1-score 출력",
+        "(12-2) 두 모델의 F1-score 결과 비교 — 성능이 더 우수한 모델은?",
+        "(12-3) RandomForest 모델의 Confusion Matrix를 seaborn heatmap으로 시각화",
+        "confusion_matrix 함수 사용, annot=True, fmt='d', cmap='Blues'",
+        "X축: 'Predicted', Y축: 'Actual' 라벨 표시"
       ],
       "choices": null,
-      "answer": "randomforest",
-      "answerDisplay": "답안12 = 'randomforest'",
-      "code": "from sklearn.metrics import mean_absolute_error\n\ny_pred_dt = dt.predict(X_valid)\ndt_mae = mean_absolute_error(y_valid, y_pred_dt)\ny_pred_rf = rf.predict(X_valid)\nrf_mae = mean_absolute_error(y_valid, y_pred_rf)\n\nprint(f'dt_mae: {dt_mae:.4f}')   # 0.2183\nprint(f'rf_mae: {rf_mae:.4f}')   # 0.1972\n\n답안12 = 'randomforest'",
-      "explanation": "rf_mae(0.1972) < dt_mae(0.2183)이므로 Random Forest의 성능이 더 좋습니다. MAE는 낮을수록 좋은 지표입니다.",
-      "tip": "MAE(Mean Absolute Error)는 예측값과 실제값 차이의 절대값 평균입니다."
+      "answer": null,
+      "answerDisplay": "(12-1) Acc/F1 계산 / (12-2) RandomForest (F1 ≈ 0.69 > DT 0.66) / (12-3) heatmap",
+      "code": "# (12-1) 모델 평가\nfrom sklearn.metrics import accuracy_score, f1_score\n\ny_pred_dt = dt.predict(X_valid)\ny_pred_rf = rf.predict(X_valid)\n\ndt_acc = accuracy_score(y_valid, y_pred_dt)\ndt_f1 = f1_score(y_valid, y_pred_dt)\nrf_acc = accuracy_score(y_valid, y_pred_rf)\nrf_f1 = f1_score(y_valid, y_pred_rf)\n\nprint(f'DecisionTree - Accuracy: {dt_acc:.4f}, F1: {dt_f1:.4f}')\nprint(f'RandomForest - Accuracy: {rf_acc:.4f}, F1: {rf_f1:.4f}')\n\n# (12-2) 답안: RandomForest (F1 약 0.69 > DT 약 0.66)\n\n# (12-3) Confusion Matrix Heatmap\nfrom sklearn.metrics import confusion_matrix\ncm = confusion_matrix(y_valid, y_pred_rf)\nplt.figure(figsize=(6, 5))\nsns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)\nplt.xlabel('Predicted')\nplt.ylabel('Actual')\nplt.title('Confusion Matrix - RandomForest')\nplt.show()",
+      "explanation": "DT: Accuracy ~76%, F1 ~0.66 (단일 트리, 빠르지만 과적합 위험). RF: Accuracy ~80%, F1 ~0.69 (100개 트리 앙상블, 더 안정적). 클래스 불균형 시 Accuracy보다 F1-score를 우선 봐야 함. Confusion Matrix 옵션: annot=True(셀에 값 표시, 필수), fmt='d'(정수 포맷, 소수점은 '.2f'), cmap='Blues'(색상 팔레트), cbar=False(컬러바 숨김).",
+      "tip": "분류 평가지표: Accuracy(균형 시), Precision(FP 비용 클 때), Recall(FN 비용 클 때), F1(불균형 시). F1 = 2·P·R/(P+R)."
     },
     {
       "id": 13,
-      "title": "딥러닝 모델 구축 및 학습",
-      "category": "딥러닝",
+      "title": "딥러닝 분류 모델 생성 및 학습 (TensorFlow/Keras)",
+      "category": "AI 모델링",
+      "points": 12,
       "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout\nfrom tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint\ntf.random.set_seed(42)\nnp.random.seed(42)",
       "problem": [
-        "입력층: Dense 64unit selu → Dropout 0.1 → Dense 32unit selu → Dense 16unit selu → 출력층 1unit sigmoid",
-        "EarlyStopping: monitor='val_loss', patience=9 → estop 저장",
-        "optimizer: adam, loss: binary_crossentropy, metrics: accuracy",
-        "batch_size: 128, epochs: 50",
-        "학습정보 → history 저장"
+        "아래 토폴로지와 가이드를 참고해서 모델링하고 학습을 수행하세요.",
+        "모델 토폴로지: 입력층 → Dense(64, relu) → Dropout(0.3) → Dense(32, relu) → Dense(16, relu) → Dense(1, sigmoid)",
+        "히든 레이어 activation: 'relu', 출력층: 'sigmoid'",
+        "EarlyStopping: monitor='val_loss', patience=10, restore_best_weights=True → es 변수에 저장",
+        "compile: optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']",
+        "fit: batch_size=32, epochs=50, validation_data 옵션, callbacks=[es]",
+        "학습 정보는 history 변수에 저장"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": null,
-      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout\nfrom tensorflow.keras.callbacks import EarlyStopping\ntf.random.set_seed(1)",
-      "code": "model = Sequential()\nmodel.add(Dense(64, activation='selu', input_shape=(X_train.shape[1],)))\nmodel.add(Dropout(0.1))\nmodel.add(Dense(32, activation='selu'))\nmodel.add(Dense(16, activation='selu'))\nmodel.add(Dense(1, activation='sigmoid'))\n\nestop = EarlyStopping(monitor='val_loss', patience=9)\n\nmodel.compile(optimizer='adam',\n             loss='binary_crossentropy',\n             metrics=['accuracy'])\n\nhistory = model.fit(X_train, y_train,\n                    batch_size=128, epochs=50,\n                    validation_data=(X_valid, y_valid),\n                    callbacks=[estop])",
-      "explanation": "Survived는 이진분류이므로 출력층에 sigmoid, 손실함수에 binary_crossentropy를 사용합니다. monitor='val_loss' 사용 시 validation_data가 필수입니다.",
-      "tip": "selu 활성화 함수는 self-normalizing 특성이 있어 BatchNormalization 없이도 안정적인 학습이 가능합니다."
+      "answerDisplay": "Sequential 5층 모델 + EarlyStopping + adam/binary_crossentropy",
+      "code": "model = Sequential([\n    Dense(64, activation='relu', input_dim=X_train.shape[1]),\n    Dropout(0.3),\n    Dense(32, activation='relu'),\n    Dense(16, activation='relu'),\n    Dense(1, activation='sigmoid')\n])\nes = EarlyStopping(\n    monitor='val_loss',\n    patience=10,\n    restore_best_weights=True\n)\nmodel.compile(\n    optimizer='adam',\n    loss='binary_crossentropy',\n    metrics=['accuracy']\n)\nhistory = model.fit(\n    X_train, y_train,\n    validation_data=(X_valid, y_valid),\n    epochs=50,\n    batch_size=32,\n    callbacks=[es]\n)",
+      "explanation": "출력층 결정(가장 중요): 이진분류 sigmoid → Dense(1, sigmoid) + binary_crossentropy. 다중분류 softmax → Dense(N, softmax) + sparse_categorical_crossentropy. 회귀 linear → Dense(1) + mse. 활성화 함수: relu(히든 일반), sigmoid(이진 출력), softmax(다중 출력), linear(회귀 출력).",
+      "tip": "자주 틀림: 'epoch=50' (s 필수 → epochs), 'validation=(...)' (→ validation_data), 'callback=[es]' (s 필수 → callbacks). EarlyStopping: val_loss가 patience epoch 동안 개선 안 되면 자동 중단, restore_best_weights=True로 최적 가중치 복원."
     },
     {
       "id": 14,
-      "title": "딥러닝 모델 학습/검증 accuracy 그래프",
-      "category": "딥러닝",
+      "title": "학습/검증 Loss 시각화",
+      "category": "AI 모델링",
+      "points": 7,
       "type": "code",
       "problem": [
-        "1개 그래프에 학습/검증 accuracy 모두 표시",
-        "범례: 'accuracy', 'val_accuracy'",
-        "그래프 타이틀: 'Model Accuracy'",
-        "X축: 'Epochs', Y축: 'Accuracy'"
+        "matplotlib 라이브러리로 학습 Loss와 검증 Loss 변화를 그래프로 시각화",
+        "1개 그래프에 학습 Loss(loss)와 검증 Loss(val_loss) 2가지 모두 표시",
+        "각 범례: 'train_loss', 'val_loss'",
+        "그래프 타이틀: 'Model Loss'",
+        "X축: 'Epochs', Y축: 'Loss'"
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": null,
-      "code": "import matplotlib.pyplot as plt\n\naccuracy     = history.history['accuracy']\nval_accuracy = history.history['val_accuracy']\n\nplt.figure(figsize=(8, 5))\nplt.plot(accuracy,     label='accuracy')\nplt.plot(val_accuracy, label='val_accuracy')\nplt.title('Model Accuracy')\nplt.xlabel('Epochs')\nplt.ylabel('Accuracy')\nplt.legend()\nplt.show()",
-      "explanation": "학습/검증 accuracy 차이가 크면 과적합(overfitting) 가능성이 있습니다. val_accuracy가 수렴하는 시점에서 EarlyStopping이 작동합니다.",
-      "tip": "accuracy와 val_accuracy의 격차가 커지는 시점이 과적합이 시작되는 지점입니다."
+      "answerDisplay": "plt.plot(history.history['loss']) + plt.plot(history.history['val_loss'])",
+      "code": "plt.plot(history.history['loss'])\nplt.plot(history.history['val_loss'])\nplt.title('Model Loss')\nplt.xlabel('Epochs')\nplt.ylabel('Loss')\nplt.legend(['train_loss', 'val_loss'])\nplt.show()",
+      "explanation": "학습 곡선 해석: 이상적(train/val 둘 다 감소하며 비슷한 값에 수렴) / 과적합(train 감소, val 증가 → Dropout 강화, epochs 줄임) / 과소적합(둘 다 정체 → 모델 복잡도 증가) / EarlyStopping 효과(val_loss 10 epoch 개선 안 되면 자동 중단).",
+      "tip": "history.history.keys() = dict_keys(['loss', 'accuracy', 'val_loss', 'val_accuracy']). 컴파일 시 metrics=['accuracy']면 키는 'accuracy', metrics=['mse']면 키는 'mse'."
+    },
+    {
+      "id": 15,
+      "title": "새 승객 1명 생존 여부 예측 시뮬레이션",
+      "category": "AI 모델링",
+      "points": 14,
+      "type": "code",
+      "problem": [
+        "새로운 승객 정보: 3등급 객실의 25세 남성, 가족 없이 혼자 탑승, 운임 10.5, Southampton 항구",
+        "컬럼 순서: ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare', 'Gender_male', 'Embarked_Q', 'Embarked_S']",
+        "new_passenger = np.array([[3, 25, 0, 0, 10.5, 1, 0, 1]])  (shape=(1, 8) 2차원)",
+        "주어진 new_passenger를 그대로 사용",
+        "훈련 데이터에서 학습한 ss 스케일러로 변환 (⚠ fit_transform 사용 금지)",
+        "변환 배열은 new_scaled 변수에 저장",
+        "model로 생존 확률 예측 → pred_prob 변수",
+        "확률을 클래스로 변환 → pred_class 변수 (sigmoid이므로 0.5 기준)",
+        "출력 형식: 생존 확률(소수점 4자리), 예측 클래스(0/1), 메시지(생존 또는 사망)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "생존 확률 약 11~15%, 예측 클래스 0 (사망)",
+      "code": "# 1. 스케일링 (훈련 데이터에서 학습한 스케일러로 변환 — transform만!)\nnew_scaled = ss.transform(new_passenger)\n\n# 2. 예측 확률 산출\npred_prob = model.predict(new_scaled)\n\n# 3. 확률 → 클래스 변환 (sigmoid 출력층이므로 0.5 기준)\npred_class = (pred_prob >= 0.5).astype(int)\n\n# 4. 결과 출력\nprint(f'생존 확률: {pred_prob[0][0]:.4f}')\nprint(f'예측 클래스: {pred_class[0][0]}')\nif pred_class[0][0] == 1:\n    print('이 승객은 생존할 것으로 예측됩니다.')\nelse:\n    print('이 승객은 사망할 것으로 예측됩니다.')\n\n# 예상 출력:\n# 생존 확률: 0.1160\n# 예측 클래스: 0\n# 이 승객은 사망할 것으로 예측됩니다.",
+      "explanation": "3등급 남성 + 가족 없음 + 낮은 운임 — 변수중요도와 일치하는 저생존 프로필(Gender_male=1 → 생존율 낮음, 3등급 → 낮음, 낮은 운임 → 낮음). 핵심 체크: (1) 입력은 2차원 배열 [[...]] (1차원 금지 → 'Expected 2D array' 오류), (2) 컬럼 순서 정확히 (NumPy는 순서로만 매핑), (3) 스케일링은 transform만 (fit_transform 절대 금지), (4) sigmoid는 0.5 기준 클래스 변환.",
+      "tip": "자주 나오는 오답: np.array([3,25,...]) 1차원 → ValueError, ss.fit_transform(new_passenger) → 학습 기준 무시, 컬럼 순서 잘못 → 완전히 다른 결과. 확률→클래스: sigmoid → (prob >= 0.5).astype(int), softmax → np.argmax(prob, axis=1)."
     }
   ]
 }

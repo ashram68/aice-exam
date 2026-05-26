@@ -973,22 +973,6 @@ h4 { font-size: 1.1rem; }
   margin-top: 0.25rem;
 }
 
-/* === Components: Demo Note === */
-.demo-note {
-  background: var(--color-surface-container);
-  border: 1px dashed var(--color-outline-variant);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-  margin-top: 2rem;
-  font-size: 0.8125rem;
-  color: var(--color-on-surface-variant);
-  line-height: 1.7;
-}
-
-.demo-note strong {
-  color: var(--color-on-surface);
-}
-
 /* === Components: Error Message === */
 .error-msg {
   color: var(--color-error);
