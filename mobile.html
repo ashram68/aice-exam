@@ -96,9 +96,12 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    // Share URL: always site root so PC recipient lands on index.html (not mobile redirect)
+    var SHARE_URL = window.location.origin + '/';
+
     // Link copy
     document.getElementById('copy-link-btn').addEventListener('click', function () {
-      var url = window.location.origin + window.location.pathname.replace(/mobile\.html$/, '');
+      var url = SHARE_URL;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(function () {
           showToast('링크가 복사되었습니다!');
@@ -117,7 +120,7 @@
 
     // Web Share API
     document.getElementById('share-btn').addEventListener('click', function () {
-      var url = window.location.origin + window.location.pathname.replace(/mobile\.html$/, '');
+      var url = SHARE_URL;
       if (navigator.share) {
         navigator.share({
           title: 'AICE 가상 모의고사',
