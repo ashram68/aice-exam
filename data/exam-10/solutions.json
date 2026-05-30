@@ -1,0 +1,289 @@
+{
+  "examId": "exam-10",
+  "title": "AICE Associate 모의고사 10회 — 제조 공정 품질(불량) 판정",
+  "subtitle": "이진 분류 (Binary Classification) · 100점 · 14문항",
+  "dataset": "factory_quality.csv",
+  "domain": "스마트팩토리 / 품질 관리 (QC)",
+  "targetVariable": "defect (0=정상, 1=불량)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 30, "range": "Q1~Q6"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q7~Q10"},
+    {"name": "AI 모델링", "points": 40, "range": "Q11~Q14"}
+  ],
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./factory_quality.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "seaborn 라이브러리 불러오기 (alias sns)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "seaborn을 사용할 수 있게 별칭(alias)을 sns로 해서 불러오세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "import seaborn as sns",
+      "code": "import seaborn as sns",
+      "explanation": "import 라이브러리 as 별칭 문법. seaborn은 시각화 라이브러리이며 관례 별칭은 sns입니다. 자주 쓰는 alias: pandas→pd, numpy→np, seaborn→sns, matplotlib.pyplot→plt, sklearn→sk.",
+      "tip": "자주 나오는 오답: 'import seaborn sns' (as 누락). 이번 회차는 jointplot·pointplot 등 다양한 seaborn 시각화를 사용."
+    },
+    {
+      "id": 2,
+      "title": "데이터 파일(factory_quality.csv) 읽어오기",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "pandas로 데이터 파일을 읽어온 뒤, 데이터프레임 변수명 df에 할당하고 첫 4개 행을 출력하세요.",
+        "데이터프레임 변수명: df",
+        "데이터 파일명: factory_quality.csv (동일 경로)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df = pd.read_csv('./factory_quality.csv'); df.head(4)",
+      "code": "df = pd.read_csv('./factory_quality.csv')\ndf.head(4)\n# machine, temperature, ..., defect (2000행 × 8열)",
+      "explanation": "pd.read_csv()로 CSV를 읽고 df에 할당, head(4)로 첫 4개 행을 확인합니다. 전체 2,000행 8열이며 타겟 defect(0=정상, 1=불량)는 이진분류 문제입니다.",
+      "tip": "head() 괄호 안 숫자 미지정 시 기본 5행. 문항이 4개 행을 요구하면 head(4)."
+    },
+    {
+      "id": 3,
+      "title": "불량 여부별 평균 압력 (groupby)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(3-1) groupby로 불량 여부(defect)별 평균 압력(pressure)을 구해 출력하세요.",
+        "대상 데이터프레임: df",
+        "(3-2) 불량(defect=1)의 평균 압력은 정상(0)보다 대체로 어떠한가요? (높다 / 낮다)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(3-1) df.groupby('defect')['pressure'].mean() / (3-2) 높다 (112.34 > 108.49)",
+      "code": "# (3-1)\ndf.groupby('defect')['pressure'].mean()\n# defect 0: 108.49 / 1: 112.34\n\n# (3-2) 답안: 높다  (불량 112.34 > 정상 108.49)",
+      "explanation": "groupby('defect')['pressure'].mean()은 불량 여부별로 그룹을 묶어 압력의 평균을 계산합니다. 불량(1)의 평균 압력 112.34가 정상(0) 108.49보다 높습니다 — 고압 공정일수록 불량 위험이 커지는 경향을 집계로 확인할 수 있습니다.",
+      "tip": "groupby(기준컬럼)[대상컬럼].집계함수() 패턴. 평균(mean) 외 sum·count·median 등 사용 가능. 그룹별 통계 비교에 핵심."
+    },
+    {
+      "id": 4,
+      "title": "온도-진동 관계 jointplot (hue=defect)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(4-1) seaborn의 jointplot으로 공정 온도(temperature)와 진동(vibration)의 분포·관계를 불량 여부별로 그리세요.",
+        "대상 데이터프레임: df, X축: temperature, Y축: vibration, 색상 구분(hue): defect",
+        "(4-2) 불량(defect=1) 제품은 주로 온도·진동이 (높은 / 낮은) 영역에 분포하나요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(4-1) jointplot(x='temperature', y='vibration', hue='defect') / (4-2) 높은 영역",
+      "code": "# (4-1)\nsns.jointplot(data=df, x='temperature', y='vibration', hue='defect')\nplt.show()\n\n# (4-2) 답안: 높은 영역\n# 불량 평균 온도 76.7·진동 2.93 vs 정상 73.3·1.81",
+      "explanation": "jointplot은 두 변수의 산점도(중앙)와 각 변수의 분포(가장자리)를 함께 보여주고, hue=defect로 불량 여부를 색 구분합니다. 불량(1)이 정상(0)보다 온도·진동이 모두 높은 영역으로 치우쳐 있습니다(불량 평균 온도 76.7·진동 2.93 vs 정상 73.3·1.81). 고온·고진동 공정이 불량과 연관됩니다.",
+      "tip": "jointplot은 관계+분포를 한 번에. hue로 그룹 구분. 불량이 몰리는 영역(고온·고진동)을 보면 핵심 위험 요인을 파악."
+    },
+    {
+      "id": 5,
+      "title": "생산 라인별 불량률 pointplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(5-1) seaborn의 pointplot으로 생산 라인(machine)별 불량률을 그리세요.",
+        "대상 데이터프레임: df, X축: machine, Y축: defect (defect 평균 = 불량률)",
+        "(5-2) 불량률이 가장 높은 생산 라인은 무엇인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(5-1) pointplot(x='machine', y='defect') / (5-2) C (불량률 ≈0.49)",
+      "code": "# (5-1)\nsns.pointplot(data=df, x='machine', y='defect', order=['A', 'B', 'C'])\nplt.show()\n\n# (5-2) 답안: C  (불량률 C 0.49 > B 0.44 > A 0.31)",
+      "explanation": "pointplot은 각 범주(machine)의 y값(defect) 평균을 점과 선으로 표시합니다. defect는 0/1이므로 평균이 곧 불량률입니다. C 라인의 불량률(≈0.49)이 B(≈0.44)·A(≈0.31)보다 높아, C 라인이 우선 점검 대상입니다.",
+      "tip": "0/1 타겟의 평균 = 비율(불량률). pointplot은 그룹별 평균 추세를 점-선으로(barplot과 유사하나 추세 강조). order로 순서 지정."
+    },
+    {
+      "id": 6,
+      "title": "타겟 클래스 분포 (value_counts)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(6-1) value_counts() 함수로 defect의 클래스별 개수를 출력하세요. (대상: df)",
+        "(6-2) 불량(defect=1)에 해당하는 데이터는 총 몇 건인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(6-1) df['defect'].value_counts() / (6-2) 800",
+      "code": "# (6-1)\ndf['defect'].value_counts()\n# 0(정상): 1200 / 1(불량): 800\n\n# (6-2) 답안: 800  (불량률 약 40%)",
+      "explanation": "value_counts()는 클래스별 빈도를 반환합니다. 불량(defect=1) 800건, 정상(0) 1,200건으로 약 40% 불량률입니다. 비교적 불균형이 크지 않지만, 불량 탐지가 목적이므로 Accuracy와 함께 F1·Recall도 살펴야 합니다.",
+      "tip": "value_counts()로 클래스 분포 확인. 불량 40%는 경미한 불균형. 양성(불량) 탐지가 중요하면 F1·Recall 중심으로 평가."
+    },
+    {
+      "id": 7,
+      "title": "진동 IQR 이상치 처리 (오류 정정)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(7-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상 데이터프레임: df",
+        "IQR = Q3 − Q1, 상한 = Q3 + 1.5·IQR, 하한 = Q1 − 1.5·IQR",
+        "진동(vibration)이 상한 초과 또는 하한 미만인 행(row)을 삭제 → df_temp에 저장",
+        "오류: iqr = q1 - q3 → q3 - q1 / df.drop(불리언) → 조건 인덱싱(상·하한 모두)",
+        "(7-2) 이상치 처리로 삭제된 행은 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(7-1) iqr=q3-q1, df[(상한이하)&(하한이상)] / (7-2) 65",
+      "code": "# (7-1) 오류 정정\nq1 = df['vibration'].quantile(0.25)\nq3 = df['vibration'].quantile(0.75)\niqr = q3 - q1\nupper = q3 + 1.5 * iqr\nlower = q1 - 1.5 * iqr\ndf_temp = df[(df['vibration'] <= upper) & (df['vibration'] >= lower)]\nprint(len(df) - len(df_temp))   # 65\n\n# (7-2) 답안: 65  (제거 후 1,935행)",
+      "explanation": "두 가지 오류를 정정합니다: ① IQR = Q3 − Q1인데 코드가 q1 - q3(순서 반대)이라 q3 - q1로 수정. ② df.drop(불리언 시리즈)는 동작하지 않으므로, 정상 범위(하한 이상 AND 상한 이하)인 행만 남기는 조건 인덱싱으로 수정합니다(원본은 상한만 봤으므로 하한도 반영). 진동 상한 ≈5.78 초과 등 이상치 65개가 제거되어 1,935행이 남습니다.",
+      "tip": "IQR 이상치는 상·하한 양쪽 모두. 조건 인덱싱 df[(>=lower) & (<=upper)]로 정상 범위만 유지(또는 .index로 drop). iqr 순서(Q3-Q1) 주의."
+    },
+    {
+      "id": 8,
+      "title": "결측치 처리 빈칸 (수치 median / 범주 mode[0])",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "수치형 컬럼은 중앙값으로, 범주형(object) 컬럼은 최빈값으로 결측치를 채우세요.",
+        "대상 데이터프레임: df_temp",
+        "빈칸 코드: 수치형 fillna(df_temp[col].<#8-1>()) / 범주형 fillna(df_temp[col].<#8-2>()[0])",
+        "(8-1) #8-1 빈칸에 들어갈 함수명은?",
+        "(8-2) #8-2 빈칸에 들어갈 함수명은?",
+        "(8-2 추가) df_temp의 결측치 처리 전 총 결측치 개수는 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(8-1) median / (8-2) mode / 처리 전 총 결측 187개 → 처리 후 0",
+      "code": "print('처리 전:', df_temp.isnull().sum().sum())   # 187\nnum_cols = df_temp.select_dtypes(include='number').columns\ncat_cols = df_temp.select_dtypes(include='object').columns\nfor col in num_cols:\n    df_temp[col] = df_temp[col].fillna(df_temp[col].median())\nfor col in cat_cols:\n    df_temp[col] = df_temp[col].fillna(df_temp[col].mode()[0])\nprint('처리 후:', df_temp.isnull().sum().sum())   # 0\n\n# 답안\n# (8-1) median / (8-2) mode / 처리 전 총 결측 187개",
+      "explanation": "select_dtypes로 수치형(number)·범주형(object)을 분리한 뒤, 수치형(temperature·humidity)은 중앙값 median(), 범주형(machine)은 최빈값 mode()[0]으로 채웁니다. mode()는 Series를 반환하므로 [0]이 필요합니다. 결측 처리 전 총 187개였던 결측치가 처리 후 0이 됩니다.",
+      "tip": "select_dtypes(include='number'/'object')로 dtype별 선택. 수치형 median(), 범주형 mode()[0]. mode()[0]의 [0] 필수."
+    },
+    {
+      "id": 9,
+      "title": "원-핫 인코딩 빈칸 (get_dummies, machine)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "범주형 컬럼 'machine'을 원-핫 인코딩하고 결과를 df_preset에 저장하세요.",
+        "대상 데이터프레임: df_temp",
+        "빈칸 코드: df_preset = pd.<#9-1>(data=df_temp, <#9-2>=['machine'])",
+        "(9-1) #9-1 빈칸에 들어갈 함수명은?",
+        "(9-2) #9-2 빈칸에 들어갈 옵션명은?",
+        "(9-2 추가) df_preset의 전체 컬럼 개수는 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(9-1) get_dummies / (9-2) columns / df_preset 10개 컬럼",
+      "code": "df_preset = pd.get_dummies(data=df_temp, columns=['machine'])\ndf_preset.info()\n\n# 답안\n# (9-1) get_dummies / (9-2) columns / 전체 10개 컬럼\n# (machine 제외 7개(defect 포함) + machine_A/B/C 3개 = 10)",
+      "explanation": "get_dummies(columns=['machine'])로 생산 라인을 원-핫 인코딩하면 machine_A, machine_B, machine_C 3개 더미로 분리됩니다. machine을 제외한 기존 7개 컬럼(defect 포함) + 더미 3개 = 전체 10개 컬럼이 됩니다. 타겟 defect는 0/1 수치형이라 인코딩 대상이 아닙니다.",
+      "tip": "get_dummies(columns=[...])로 지정 컬럼만 원핫. machine(3범주) → 3개 더미. 타겟(0/1 defect)은 이미 수치형이라 인코딩 제외."
+    },
+    {
+      "id": 10,
+      "title": "데이터 분리 + MinMaxScaler (오류 정정)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "(10-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상: df_preset, 타겟=defect, 나머지=피처(X)",
+        "훈련:검증 = 80:20, 클래스 비율 유지(stratify), random_state=42",
+        "MinMaxScaler를 훈련데이터에 학습·변환하고, 검증데이터에는 학습된 기준만 적용",
+        "오류: 훈련에 transform(미학습) / 검증에 fit_transform(누수) → 훈련 fit_transform / 검증 transform",
+        "(10-2) 분할된 검증데이터(X_valid)의 행 개수는 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(10-1) 훈련 fit_transform, 검증 transform / (10-2) 387",
+      "code": "# (10-1) 오류 정정\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import MinMaxScaler\n\nX = df_preset.drop('defect', axis=1)\ny = df_preset['defect']\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y, test_size=0.2, stratify=y, random_state=42\n)\nmm = MinMaxScaler()\nX_train = mm.fit_transform(X_train)\nX_valid = mm.transform(X_valid)\nprint(X_valid.shape)   # (387, 9)\n\n# (10-2) 답안: 387  (1935행의 20%)",
+      "explanation": "원본 코드는 훈련에 transform(학습 안 됨), 검증에 fit_transform(데이터 누수)을 적용해 거꾸로 되어 있습니다. 올바른 순서는 훈련 fit_transform, 검증 transform입니다. 이진분류이므로 stratify=y로 정상/불량 비율을 유지하며, 이상치 제거 후 1,935행의 20%인 387행이 검증데이터가 됩니다(X_valid.shape = (387, 9)).",
+      "tip": "철칙: 훈련 fit_transform, 검증/테스트 transform. MinMaxScaler는 0~1 정규화. 분류는 stratify=y로 클래스 비율 유지."
+    },
+    {
+      "id": 11,
+      "title": "LogisticRegression + RandomForest 모델 학습",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "(11-1) LogisticRegression 모델을 lr 변수에 저장하고 훈련데이터로 학습",
+        "max_iter=1000, random_state=42",
+        "(11-2) RandomForestClassifier 모델을 rf 변수에 저장하고 훈련데이터로 학습",
+        "최대 깊이=5, min_samples_split=3, random_state=42"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LogisticRegression(max_iter=1000) + RandomForestClassifier(max_depth=5, min_samples_split=3)",
+      "code": "# (11-1) LogisticRegression\nfrom sklearn.linear_model import LogisticRegression\nlr = LogisticRegression(max_iter=1000, random_state=42)\nlr.fit(X_train, y_train)\n\n# (11-2) RandomForest\nfrom sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(max_depth=5, min_samples_split=3, random_state=42)\nrf.fit(X_train, y_train)",
+      "explanation": "LogisticRegression은 선형 분류 모델로, max_iter=1000은 수렴을 위한 최대 반복 횟수입니다(기본값 100으로는 수렴 경고가 날 수 있음). RandomForestClassifier는 트리 앙상블입니다. 선형 모델과 트리 앙상블을 비교해 데이터에 적합한 쪽을 선택합니다.",
+      "tip": "LogisticRegression은 분류 모델(이름에 Regression이 있지만 분류용). max_iter를 늘리면 수렴 경고 방지. 선형 vs 앙상블 비교."
+    },
+    {
+      "id": 12,
+      "title": "모델 평가 (오류 정정, Accuracy·F1)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "(12-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "성능 평가는 검증데이터셋을 활용",
+        "두 모델의 정확도(accuracy)와 F1-score를 각각 구해 출력",
+        "오류: lr.predict(X_train)→X_valid / accuracy→accuracy_score / f1→f1_score",
+        "(12-2) 두 모델의 성능을 비교했을 때(F1이 높을수록 우수) 더 우수한 모델은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(12-1) X_valid/accuracy_score/f1_score로 정정 / (12-2) LogisticRegression (F1 0.60 > RF 0.5736)",
+      "code": "# (12-1) 오류 정정\ny_pred_lr = lr.predict(X_valid)\ny_pred_rf = rf.predict(X_valid)\nfrom sklearn.metrics import accuracy_score, f1_score\nlr_acc = accuracy_score(y_valid, y_pred_lr)\nlr_f1 = f1_score(y_valid, y_pred_lr)\nrf_acc = accuracy_score(y_valid, y_pred_rf)\nrf_f1 = f1_score(y_valid, y_pred_rf)\nprint(lr_acc, lr_f1, rf_acc, rf_f1)\n# 0.7209 0.6000 0.7158 0.5736\n\n# (12-2) 답안: LogisticRegression (F1 0.60 > RF 0.5736)",
+      "explanation": "오류 정정: lr.predict(X_train)→X_valid(검증데이터로 평가), accuracy→accuracy_score, f1→f1_score(정확한 함수명). 정확도는 LR 0.7209 vs RF 0.7158로 거의 같지만 F1이 0.60 > 0.5736으로 LogisticRegression이 불량(양성) 탐지에서 더 우수합니다. 불량 탐지처럼 양성 클래스가 중요한 문제에서는 Accuracy보다 F1을 함께 봐야 합니다.",
+      "tip": "양성(불량) 탐지 중요 → Accuracy보다 F1 우선. 함수명: accuracy_score, f1_score(끝에 _score). 평가는 검증데이터로."
+    },
+    {
+      "id": 13,
+      "title": "딥러닝 이진분류 모델 (softmax 2 + ModelCheckpoint)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout, Input\nfrom tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint\nfrom tensorflow.keras.utils import to_categorical\ntf.random.set_seed(42)",
+      "problem": [
+        "토폴로지와 가이드를 참고해 딥러닝 모델을 구현·학습하세요.",
+        "타겟 y_train, y_valid를 to_categorical로 2클래스 원-핫 인코딩 (이진분류이지만 2유닛 softmax 사용)",
+        "모델 토폴로지: Input → Dense(64, relu) → Dropout(0.3) → Dense(32, relu) → Dense(2, softmax)",
+        "히든 activation='relu', 출력 activation='softmax' (2클래스)",
+        "compile: optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']",
+        "EarlyStopping을 es에 저장: monitor='val_loss', patience=10, restore_best_weights=True",
+        "ModelCheckpoint를 checkpoint에 저장: 'best_model.keras', monitor='val_loss', save_best_only=True",
+        "fit: epochs=50, batch_size=128, validation_data=(X_valid, y_valid), callbacks=[es, checkpoint] → history",
+        "학습 후 history로 accuracy/val_accuracy 곡선 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(Input→Dense64→Dropout→Dense32→softmax2) + to_categorical(2) + categorical_crossentropy (정확도 ≈ 0.70)",
+      "code": "# 이진분류이지만 2클래스 원-핫 + softmax(2) 방식\ny_train = to_categorical(y_train, 2)\ny_valid = to_categorical(y_valid, 2)\n\nes = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)\ncheckpoint = ModelCheckpoint('best_model.keras', monitor='val_loss', save_best_only=True)\n\nmodel = Sequential([\n    Input(shape=(X_train.shape[1],)),\n    Dense(64, activation='relu'),\n    Dropout(0.3),\n    Dense(32, activation='relu'),\n    Dense(2, activation='softmax')\n])\nmodel.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])\nhistory = model.fit(\n    X_train, y_train,\n    validation_data=(X_valid, y_valid),\n    epochs=50, batch_size=128,\n    callbacks=[es, checkpoint]\n)\n\n# 정확도 곡선 출력\nplt.plot(history.history['accuracy'])\nplt.plot(history.history['val_accuracy'])\nplt.title('Model Accuracy')\nplt.xlabel('Epoch')\nplt.ylabel('Accuracy')\nplt.legend(['accuracy', 'val_accuracy'])\nplt.show()\n# test accuracy ≈ 0.70",
+      "explanation": "이진분류를 softmax(2)로 푸는 방식입니다. 출력 Dense(2, 'softmax') + 타겟 to_categorical(y, 2) + loss='categorical_crossentropy'가 한 세트입니다(sigmoid(1)+binary_crossentropy 대신 사용하며 결과는 동일한 이진 판별). EarlyStopping·ModelCheckpoint로 과적합 방지와 최적 모델 저장('best_model.keras', Q14에서 재사용)을 수행합니다. 검증 정확도는 약 0.70 수준입니다.",
+      "tip": "이진분류 두 방식: ① Dense(1,sigmoid)+binary_crossentropy(정수 타겟), ② Dense(2,softmax)+categorical_crossentropy(2클래스 원-핫). 10회는 ②. ModelCheckpoint로 최적 모델 저장."
+    },
+    {
+      "id": 14,
+      "title": "신규 제품 불량 여부 예측 시뮬레이션",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "checkpoint가 저장한 best_model.keras를 load_model로 불러와 신규 제품 3건의 불량 여부를 예측하세요.",
+        "주어진 new_data(3건)는 그대로 사용 (열 순서: temperature, pressure, vibration, rotation_speed, humidity, operation_hours, machine_A, machine_B, machine_C)",
+        "학습과 동일한 스케일러(mm)로 변환한 뒤 예측",
+        "softmax 예측 결과를 argmax로 클래스(0=정상 / 1=불량)로 변환해 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "load_model + mm.transform + argmax → ['불량', '정상', '불량']",
+      "code": "new_data = np.array([\n    [92.0, 135.0, 5.5, 1450, 55.0, 13.0, 0, 0, 1],   # 고온·고압·고진동·C라인·장시간\n    [70.0, 105.0, 1.6, 1520, 40.0,  6.0, 1, 0, 0],   # 정상 범위·A라인\n    [78.0, 118.0, 2.6, 1480, 48.0,  9.0, 0, 1, 0],   # 중간·B라인\n])\n\nbest = load_model('best_model.keras')\nnew_scaled = mm.transform(new_data)   # 학습과 동일 스케일러 재사용\npred = best.predict(new_scaled).argmax(axis=1)\ninv = {0: '정상', 1: '불량'}\nprint([inv[i] for i in pred])\n\n# 예상 출력: ['불량', '정상', '불량']",
+      "explanation": "ModelCheckpoint가 저장한 best_model.keras를 load_model로 불러옵니다. 신규 데이터는 반드시 학습에 쓴 동일 스케일러(mm)로 transform만 적용합니다. softmax 출력(2개 확률)에서 argmax(axis=1)로 클래스를 정하고, 역매핑으로 정상/불량을 출력합니다. ①고온·고압·고진동·C라인·장시간 → 불량, ②정상 범위·A라인 → 정상, ③중간·B라인 → 불량으로, Q3~5에서 본 고온·고진동·C라인의 불량 경향과 일치합니다.",
+      "tip": "softmax(2) 출력 → argmax(axis=1)로 클래스 인덱스(0/1). 신규 데이터도 학습 스케일러(mm)로 transform만. ModelCheckpoint 저장 모델은 load_model로 재사용."
+    }
+  ]
+}

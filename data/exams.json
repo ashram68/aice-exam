@@ -4,7 +4,7 @@
       "id": "exam-01",
       "title": "1회차 모의고사",
       "subtitle": "타이타닉 생존 예측 (이진 분류)",
-      "description": "Titanic 데이터셋 기반 15문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "description": "Titanic 데이터셋 기반 15문항 · 100점.\n데이터 분석(30점) + 전처리(30점) + AI 모델링(40점).",
       "questionCount": 15,
       "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-01/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_1%ED%9A%8C_Titanic.ipynb",
       "lectureUrl": "#",
@@ -13,72 +13,92 @@
     {
       "id": "exam-02",
       "title": "2회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "데이터 전처리와 시각화 중심.\n기초 통계 분석 및 모델 평가.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "직원 이직 여부 예측 (이진 분류)",
+      "description": "HR 직원 데이터 기반 14문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-02/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_2%ED%9A%8C_HR_Attrition.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-03",
       "title": "3회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "결측치 처리와 피처 엔지니어링.\n분류 모델 구축 및 성능 비교.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "중고차 판매 가격 예측 (회귀)",
+      "description": "중고차 매물 데이터 기반 14문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-03/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_3%ED%9A%8C_CarPrice.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-04",
       "title": "4회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "상관관계 분석과 시각화 활용.\n회귀 모델 학습 및 평가.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "멤버십 등급 예측 (다중 분류)",
+      "description": "이커머스 고객 데이터 기반 14문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-04/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_4%ED%9A%8C_MembershipTier.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-05",
       "title": "5회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "원-핫 인코딩과 스케일링 적용.\n앙상블 모델 비교 분석.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "대출 연체 여부 예측 (이진 분류)",
+      "description": "대출 신청자 데이터 기반 14문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-05/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_5%ED%9A%8C_LoanDefault.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-06",
       "title": "6회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "피벗 테이블과 그룹 분석.\n딥러닝 모델 구축 및 튜닝.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "통신사 고객 이탈 예측 (이진 분류)",
+      "description": "통신사 고객 데이터 기반 14문항 · 100점.\n데이터 분석(20점) + 전처리(30점) + AI 모델링(50점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-06/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_6%ED%9A%8C_TelcoChurn.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-07",
       "title": "7회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "이상치 탐지와 데이터 정제.\n모델 성능 평가 지표 비교.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "건강보험료 예측 (회귀)",
+      "description": "건강보험 고객 데이터 기반 14문항 · 100점.\n데이터 분석(30점) + 전처리(30점) + AI 모델링(40점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-07/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_7%ED%9A%8C_InsuranceCharges.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "exam-08",
       "title": "8회차 모의고사",
-      "subtitle": "기초 데이터 분석",
-      "description": "종합 데이터 분석 실전 문제.\nEDA부터 모델 배포까지 전 과정.",
-      "questionCount": 0,
-      "colabUrl": "#",
+      "subtitle": "와인 품질 등급 분류 (다중 분류)",
+      "description": "와인 품질 데이터 기반 14문항 · 100점.\n데이터 분석(30점) + 전처리(30점) + AI 모델링(40점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-08/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_8%ED%9A%8C_WineQuality.ipynb",
       "lectureUrl": "#",
-      "enabled": false
+      "enabled": true
+    },
+    {
+      "id": "exam-09",
+      "title": "9회차 모의고사",
+      "subtitle": "공유 자전거 대여 수요 예측 (회귀)",
+      "description": "공유 자전거 주행 데이터 기반 14문항 · 100점.\n데이터 분석(30점) + 전처리(30점) + AI 모델링(40점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-09/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_9%ED%9A%8C_BikeRental.ipynb",
+      "lectureUrl": "#",
+      "enabled": true
+    },
+    {
+      "id": "exam-10",
+      "title": "10회차 모의고사",
+      "subtitle": "제조 공정 품질 판정 (이진 분류)",
+      "description": "공정 센서 데이터 기반 14문항 · 100점.\n데이터 분석(30점) + 전처리(30점) + AI 모델링(40점).",
+      "questionCount": 14,
+      "colabUrl": "https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-10/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_10%ED%9A%8C_FactoryQuality.ipynb",
+      "lectureUrl": "#",
+      "enabled": true
     }
   ]
 }

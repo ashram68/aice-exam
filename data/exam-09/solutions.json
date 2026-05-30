@@ -1,0 +1,288 @@
+{
+  "examId": "exam-09",
+  "title": "AICE Associate 모의고사 9회 — 공유 자전거 대여 수요 예측",
+  "subtitle": "회귀 (Regression) · 100점 · 14문항",
+  "dataset": "bike_rental.csv",
+  "domain": "교통 / 운송",
+  "targetVariable": "rental_count (시간당 대여 건수)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 30, "range": "Q1~Q6"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q7~Q10"},
+    {"name": "AI 모델링", "points": 40, "range": "Q11~Q14"}
+  ],
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./bike_rental.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "scipy 라이브러리 불러오기 (alias sp)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "scipy를 사용할 수 있게 별칭(alias)을 sp로 해서 불러오세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "import scipy as sp",
+      "code": "import scipy as sp",
+      "explanation": "import 라이브러리 as 별칭 문법. scipy는 과학·통계 계산 라이브러리이며 관례 별칭은 sp입니다. 이번 회차는 scipy.stats의 z-score를 이상치 처리에 사용합니다. 자주 쓰는 alias: pandas→pd, numpy→np, seaborn→sns, matplotlib.pyplot→plt, scipy→sp.",
+      "tip": "자주 나오는 오답: 'import scipy sp' (as 누락). 통계 함수는 scipy.stats 서브모듈(zscore 등)에 있음."
+    },
+    {
+      "id": 2,
+      "title": "데이터 파일(bike_rental.csv) 읽어오기",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "pandas로 데이터 파일을 읽어온 뒤, 데이터프레임 변수명 df에 할당하고 첫 4개 행을 출력하세요.",
+        "데이터프레임 변수명: df",
+        "데이터 파일명: bike_rental.csv (동일 경로)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df = pd.read_csv('./bike_rental.csv'); df.head(4)",
+      "code": "df = pd.read_csv('./bike_rental.csv')\ndf.head(4)\n# season, holiday, ..., rental_count (2000행 × 9열)",
+      "explanation": "pd.read_csv()로 CSV를 읽고 df에 할당, head(4)로 첫 4개 행을 확인합니다. 전체 2,000행 9열이며 타겟 rental_count(시간당 대여 건수)는 연속형 수치인 회귀 문제입니다.",
+      "tip": "head() 괄호 안 숫자 미지정 시 기본 5행. 문항이 4개 행을 요구하면 head(4)."
+    },
+    {
+      "id": 3,
+      "title": "데이터 구성 파악 (info) + 결측 컬럼 수",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(3-1) info() 함수로 전체 행·열 개수, 각 컬럼의 자료형과 결측 여부를 확인하세요. (대상: df)",
+        "(3-2) info() 출력에서 결측치가 있는(Non-Null Count가 전체 행 수보다 작은) 컬럼은 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(3-1) df.info() / (3-2) 3 (season, temperature, humidity)",
+      "code": "# (3-1)\ndf.info()\n# season: object / 나머지 8개: 수치형\n# 결측: season(1960), temperature(1920), humidity(1930)\n\n# (3-2) 답안: 3  (season, temperature, humidity 세 컬럼에 결측)",
+      "explanation": "df.info()로 각 컬럼의 Non-Null Count와 dtype을 확인합니다. 전체 2,000행 기준 Non-Null Count가 2000보다 작은 컬럼은 season(1960)·temperature(1920)·humidity(1930) 세 개입니다. 이 결측은 전처리(Q8)에서 처리합니다.",
+      "tip": "info()의 Non-Null Count < 전체 행 수 → 결측 존재. 결측 컬럼 수를 빠르게 세려면 df.isnull().sum() > 0 의 합으로도 확인 가능."
+    },
+    {
+      "id": 4,
+      "title": "계절별 평균 대여량 barplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(4-1) seaborn의 barplot으로 계절별 평균 대여량을 그리세요.",
+        "대상 데이터프레임: df, X축: season, Y축: rental_count",
+        "(4-2) 출력된 그래프에서 평균 대여량이 가장 많은 계절은 무엇인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(4-1) barplot(x='season', y='rental_count') / (4-2) Summer (≈153.6)",
+      "code": "# (4-1)\nsns.barplot(data=df, x='season', y='rental_count',\n            order=['Spring', 'Summer', 'Fall', 'Winter'])\nplt.show()\n\n# (4-2) 답안: Summer (평균 ≈153.6으로 최다)\n# Fall(≈100) > Spring(≈84) > Winter(≈33)",
+      "explanation": "barplot은 각 범주(season)의 y값(rental_count) 평균을 막대로 표시합니다. Summer가 평균 약 153.6으로 가장 많고, Fall(≈100) > Spring(≈84) > Winter(≈33) 순입니다. 기온이 높은 계절일수록 대여량이 많아, 기온이 수요의 핵심 요인임을 시사합니다.",
+      "tip": "barplot은 y의 '평균'을 막대로(에러바는 신뢰구간). order로 막대 순서 지정. 계절·기온과 대여량의 관계는 Q5에서 더 확인."
+    },
+    {
+      "id": 5,
+      "title": "기온-대여량 관계 regplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(5-1) seaborn의 regplot으로 기온(temperature)과 대여량(rental_count)의 관계(회귀선 포함)를 그리세요.",
+        "대상 데이터프레임: df, X축: temperature, Y축: rental_count",
+        "(5-2) 기온이 올라갈수록 대여량은 대체로 어떻게 변하나요? (증가 / 감소)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(5-1) regplot(x='temperature', y='rental_count') / (5-2) 증가",
+      "code": "# (5-1)\nsns.regplot(data=df, x='temperature', y='rental_count')\nplt.show()\n\n# (5-2) 답안: 증가 (회귀선 우상향 — 기온↑ → 대여량↑)",
+      "explanation": "regplot은 산점도와 선형 회귀선을 함께 그려 두 변수의 관계와 추세를 보여줍니다. 회귀선이 우상향하여 기온이 올라갈수록 대여량이 늘어나는 양의 관계가 뚜렷합니다(증가). 따뜻한 날씨에 자전거 이용이 증가하는 직관과 일치합니다.",
+      "tip": "regplot(산점도+회귀선, Axes 단위) vs lmplot(Figure 단위). 회귀선 기울기로 관계 방향(증가/감소)을 판단."
+    },
+    {
+      "id": 6,
+      "title": "타겟 기술통계 (describe)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(6-1) describe() 함수로 수치형 변수의 기술통계량을 출력하세요. (대상: df)",
+        "(6-2) describe() 출력에서 타겟 rental_count의 평균(mean)은 얼마인가요? (소수 첫째 자리)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(6-1) df.describe() / (6-2) 96.8",
+      "code": "# (6-1)\ndf.describe()\n\n# (6-2) 답안: 96.8  (rental_count 평균)",
+      "explanation": "df.describe()는 수치형 변수의 count·mean·std·min·사분위수·max를 표로 반환합니다. 타겟 rental_count의 평균(mean)은 약 96.8입니다. 회귀 모델의 예측이 이 평균 수준을 기준으로 얼마나 벗어나는지(MAE 등)로 성능을 가늠합니다.",
+      "tip": "describe()의 mean 행에서 타겟 통계를 확인. 회귀 평가 시 타겟의 스케일(평균·범위)을 알면 MAE·RMSE 해석이 쉬움."
+    },
+    {
+      "id": 7,
+      "title": "풍속 z-score 이상치 처리 (오류 정정)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(7-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상 데이터프레임: df",
+        "windspeed의 z-score 절댓값이 1.96을 초과하는 행(row)을 이상치로 보고 삭제하세요",
+        "전처리를 적용한 데이터프레임은 df_temp에 저장하세요",
+        "오류: 절댓값(np.abs) 누락 + 부등호(z < 1.96은 한쪽 꼬리만) → np.abs(z) <= 1.96 행만 유지",
+        "(7-2) 이상치 처리로 삭제된 행은 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(7-1) np.abs(stats.zscore(...)) <= 1.96 / (7-2) 64",
+      "code": "# (7-1) 오류 정정\nfrom scipy import stats\nz = np.abs(stats.zscore(df['windspeed']))\ndf_temp = df[z <= 1.96]\nprint(len(df) - len(df_temp))   # 64\n\n# (7-2) 답안: 64  (제거 후 1,936행)",
+      "explanation": "두 가지 오류를 정정합니다: ① 양쪽 꼬리(상·하한)를 모두 이상치로 보려면 절댓값 np.abs가 필요합니다. ② 정상 범위(|z| ≤ 1.96)인 행만 남겨야 하므로 부등호를 절댓값 기준 <=로 바꿉니다. z-score 절댓값이 1.96을 초과하는 풍속 이상치 64개가 제거되어 1,936행이 남습니다.",
+      "tip": "z-score 이상치는 양쪽 꼬리 → np.abs 필수. |z| > 1.96(약 95% 밖) 제거 = |z| <= 1.96 유지. 결측치는 다음 단계(Q8)에서 처리."
+    },
+    {
+      "id": 8,
+      "title": "결측치 처리 빈칸 (수치 median / 범주 mode[0])",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "수치형 컬럼은 중앙값으로, 범주형(object) 컬럼은 최빈값으로 결측치를 채우세요.",
+        "대상 데이터프레임: df_temp",
+        "빈칸 코드: 수치형 fillna(df_temp[col].<#8-1>()) / 범주형 fillna(df_temp[col].<#8-2>()[0])",
+        "(8-1) #8-1 빈칸에 들어갈 함수명은?",
+        "(8-2) #8-2 빈칸에 들어갈 함수명은?",
+        "(8-2 추가) df_temp의 결측치 처리 전 총 결측치 개수는 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(8-1) median / (8-2) mode / 처리 전 총 결측 183개 → 처리 후 0",
+      "code": "print('처리 전:', df_temp.isnull().sum().sum())   # 183\nnum_cols = df_temp.select_dtypes(include='number').columns\ncat_cols = df_temp.select_dtypes(include='object').columns\nfor col in num_cols:\n    df_temp[col] = df_temp[col].fillna(df_temp[col].median())\nfor col in cat_cols:\n    df_temp[col] = df_temp[col].fillna(df_temp[col].mode()[0])\nprint('처리 후:', df_temp.isnull().sum().sum())   # 0\n\n# 답안\n# (8-1) median / (8-2) mode / 처리 전 총 결측 183개",
+      "explanation": "select_dtypes로 수치형(number)·범주형(object)을 분리한 뒤, 수치형(temperature·humidity)은 중앙값 median(), 범주형(season)은 최빈값 mode()[0]으로 채웁니다. mode()는 Series를 반환하므로 [0]이 필요합니다. 결측 처리 전 총 183개였던 결측치가 처리 후 0이 됩니다.",
+      "tip": "select_dtypes(include='number'/'object')로 dtype별 선택. 수치형 median(), 범주형 mode()[0]. mode()[0]의 [0] 필수."
+    },
+    {
+      "id": 9,
+      "title": "원-핫 인코딩 빈칸 (get_dummies, season)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "범주형 컬럼 'season'을 원-핫 인코딩하고 결과를 df_preset에 저장하세요.",
+        "대상 데이터프레임: df_temp",
+        "빈칸 코드: df_preset = pd.<#9-1>(data=df_temp, <#9-2>=['season'])",
+        "(9-1) #9-1 빈칸에 들어갈 함수명은?",
+        "(9-2) #9-2 빈칸에 들어갈 옵션명은?",
+        "(9-2 추가) df_preset의 전체 컬럼 개수는 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(9-1) get_dummies / (9-2) columns / df_preset 12개 컬럼",
+      "code": "df_preset = pd.get_dummies(data=df_temp, columns=['season'])\ndf_preset.info()\n\n# 답안\n# (9-1) get_dummies / (9-2) columns / 전체 12개 컬럼\n# (season 제외 8개 + season_Fall/Spring/Summer/Winter 4개 = 12)",
+      "explanation": "get_dummies(columns=['season'])로 계절을 원-핫 인코딩하면 season_Fall, season_Spring, season_Summer, season_Winter 4개 더미로 분리됩니다. season을 제외한 기존 8개 컬럼(rental_count 포함) + 더미 4개 = 전체 12개 컬럼이 됩니다. 타겟 rental_count는 수치형이라 인코딩 대상이 아닙니다.",
+      "tip": "get_dummies(columns=[...])로 지정 컬럼만 원핫. season(4범주) → 4개 더미. 타겟(수치형 rental_count)은 인코딩 제외."
+    },
+    {
+      "id": 10,
+      "title": "데이터 분리 + RobustScaler (오류 정정)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "(10-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상: df_preset, 타겟=rental_count, 나머지=피처(X)",
+        "훈련:검증 = 80:20, random_state=42",
+        "RobustScaler를 훈련데이터에 학습·변환하고, 검증데이터에는 학습된 기준만 적용",
+        "오류: 훈련에 transform(미학습) / 검증에 fit_transform(누수) → 훈련 fit_transform / 검증 transform",
+        "(10-2) 분할된 검증데이터(X_valid)의 행 개수는 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(10-1) 훈련 fit_transform, 검증 transform / (10-2) 388",
+      "code": "# (10-1) 오류 정정\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import RobustScaler\n\nX = df_preset.drop('rental_count', axis=1)\ny = df_preset['rental_count']\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y, test_size=0.2, random_state=42\n)\nrs = RobustScaler()\nX_train = rs.fit_transform(X_train)\nX_valid = rs.transform(X_valid)\nprint(X_valid.shape)   # (388, 11)\n\n# (10-2) 답안: 388  (1936행의 20%)",
+      "explanation": "원본 코드는 훈련에 transform(학습 안 됨), 검증에 fit_transform(데이터 누수)을 적용해 거꾸로 되어 있습니다. 올바른 순서는 훈련 fit_transform, 검증 transform입니다. 회귀이므로 stratify는 쓰지 않으며, 이상치 제거 후 1,936행의 20%인 388행이 검증데이터가 됩니다(X_valid.shape = (388, 11)).",
+      "tip": "철칙: 훈련 fit_transform, 검증/테스트 transform. RobustScaler는 중앙값/IQR 기반(이상치 강건). 회귀는 stratify 미사용."
+    },
+    {
+      "id": 11,
+      "title": "DecisionTree + RandomForest 회귀 모델 학습",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "(11-1) DecisionTreeRegressor 모델을 dt 변수에 저장하고 훈련데이터로 학습",
+        "최대 깊이=5, min_samples_split=3, random_state=42",
+        "(11-2) RandomForestRegressor 모델을 rf 변수에 저장하고 훈련데이터로 학습",
+        "최대 깊이=5, min_samples_split=3, random_state=42"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "DecisionTreeRegressor + RandomForestRegressor (max_depth=5, min_samples_split=3)",
+      "code": "# (11-1) DecisionTree 회귀\nfrom sklearn.tree import DecisionTreeRegressor\ndt = DecisionTreeRegressor(max_depth=5, min_samples_split=3, random_state=42)\ndt.fit(X_train, y_train)\n\n# (11-2) RandomForest 회귀\nfrom sklearn.ensemble import RandomForestRegressor\nrf = RandomForestRegressor(max_depth=5, min_samples_split=3, random_state=42)\nrf.fit(X_train, y_train)",
+      "explanation": "회귀이므로 Classifier가 아니라 Regressor를 사용합니다 — DecisionTreeRegressor, RandomForestRegressor. 하이퍼파라미터(max_depth=5, min_samples_split=3)로 과적합을 제어합니다. 트리 기반 모델은 분류·회귀 모두에 쓰이지만 타겟이 연속형이면 반드시 Regressor를 선택해야 합니다.",
+      "tip": "타겟이 연속형(rental_count) → Regressor. DecisionTreeClassifier↔Regressor, RandomForestClassifier↔Regressor 짝을 혼동하지 마세요."
+    },
+    {
+      "id": 12,
+      "title": "회귀 모델 평가 (오류 정정, MAE·R²)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "(12-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "성능 평가는 검증데이터셋을 활용",
+        "두 모델의 MAE와 R²(결정계수)를 각각 구해 출력",
+        "오류: dt.predict(X_train)→X_valid / mean_absolute→mean_absolute_error / r2→r2_score / R² 출력 추가",
+        "(12-2) 두 모델의 성능을 비교했을 때(MAE가 낮고 R²가 높을수록 우수) 더 우수한 모델은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(12-1) X_valid/mean_absolute_error/r2_score로 정정+R²추가 / (12-2) RandomForest (MAE 24.76·R² 0.7733 vs DT 27.30·0.7164)",
+      "code": "# (12-1) 오류 정정\ny_pred_dt = dt.predict(X_valid)\ny_pred_rf = rf.predict(X_valid)\nfrom sklearn.metrics import mean_absolute_error, r2_score\ndt_mae = mean_absolute_error(y_valid, y_pred_dt)\nrf_mae = mean_absolute_error(y_valid, y_pred_rf)\ndt_r2 = r2_score(y_valid, y_pred_dt)\nrf_r2 = r2_score(y_valid, y_pred_rf)\nprint(dt_mae, rf_mae)   # 27.30 24.76\nprint(dt_r2, rf_r2)     # 0.7164 0.7733\n\n# (12-2) 답안: RandomForest (MAE 24.76 < 27.30, R² 0.7733 > 0.7164)",
+      "explanation": "오류 정정: dt.predict(X_train)→X_valid(검증데이터로 평가), mean_absolute→mean_absolute_error, r2→r2_score(정확한 함수명), 그리고 R² 출력을 추가합니다. MAE는 낮을수록, R²는 높을수록 우수합니다. RandomForest(MAE 24.76·R² 0.7733)가 DecisionTree(MAE 27.30·R² 0.7164)보다 두 지표 모두 우수합니다.",
+      "tip": "회귀 평가는 검증데이터로. 함수명: mean_absolute_error, r2_score(끝에 _error/_score). MAE↓·R²↑가 우수. R²는 1에 가까울수록 설명력↑."
+    },
+    {
+      "id": 13,
+      "title": "딥러닝 회귀 모델 구축 (linear + ModelCheckpoint)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout, Input\nfrom tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint\ntf.random.set_seed(42)",
+      "problem": [
+        "토폴로지와 가이드를 참고해 딥러닝 회귀 모델을 구현·학습하세요.",
+        "y_train, y_valid는 회귀 타겟이므로 원-핫 변환 없이 그대로 사용",
+        "모델 토폴로지: Input → Dense(64, relu) → Dropout(0.3) → Dense(32, relu) → Dense(1, linear)",
+        "히든 activation='relu', 출력 activation='linear' (회귀, 출력 1개)",
+        "compile: optimizer='adam', loss='mse', metrics=['mae']",
+        "EarlyStopping을 es에 저장: monitor='val_loss', patience=10, restore_best_weights=True",
+        "ModelCheckpoint를 checkpoint에 저장: 'best_model.keras', monitor='val_loss', save_best_only=True",
+        "fit: epochs=50, batch_size=128, validation_data=(X_valid, y_valid), callbacks=[es, checkpoint] → history",
+        "학습 후 history로 MAE(mae / val_mae) 곡선 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(Input→Dense64→Dropout→Dense32→Dense1 linear) + mse/mae + EarlyStopping + ModelCheckpoint (MAE ≈ 32)",
+      "code": "# 회귀 타겟이므로 원-핫 변환 없이 그대로 사용\nes = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)\ncheckpoint = ModelCheckpoint('best_model.keras', monitor='val_loss', save_best_only=True)\n\nmodel = Sequential([\n    Input(shape=(X_train.shape[1],)),\n    Dense(64, activation='relu'),\n    Dropout(0.3),\n    Dense(32, activation='relu'),\n    Dense(1, activation='linear')\n])\nmodel.compile(optimizer='adam', loss='mse', metrics=['mae'])\nhistory = model.fit(\n    X_train, y_train,\n    validation_data=(X_valid, y_valid),\n    epochs=50, batch_size=128,\n    callbacks=[es, checkpoint]\n)\n\n# MAE 곡선 출력\nplt.plot(history.history['mae'])\nplt.plot(history.history['val_mae'])\nplt.title('Model MAE')\nplt.xlabel('Epoch')\nplt.ylabel('MAE')\nplt.show()\n# test MAE ≈ 32",
+      "explanation": "회귀 딥러닝이므로 출력층은 Dense(1, activation='linear')(활성화 없이 연속값 출력), 손실은 mse(또는 mean_squared_error), 지표는 mae입니다. 회귀 타겟은 원-핫 변환을 하지 않습니다(분류와의 차이). ModelCheckpoint(save_best_only=True)로 val_loss 최소 시점 모델을 'best_model.keras'에 저장해 Q14에서 재사용합니다. 정형 데이터에서는 RandomForest(MAE 24.76)가 단순 딥러닝(≈32)보다 우수할 수 있습니다.",
+      "tip": "회귀 출력층 Dense(1, linear) + loss='mse' + metrics=['mae']. 회귀 타겟은 to_categorical 금지. ModelCheckpoint로 최적 모델 저장 → Q14 load_model 재사용."
+    },
+    {
+      "id": 14,
+      "title": "신규 조건 대여량 예측 시뮬레이션",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "checkpoint가 저장한 best_model.keras를 load_model로 불러와 신규 조건 3건의 대여량을 예측하세요.",
+        "주어진 new_data(3건)는 그대로 사용 (열 순서: holiday, workingday, temperature, humidity, windspeed, hour, weekday, season_Fall, season_Spring, season_Summer, season_Winter)",
+        "학습과 동일한 스케일러(rs)로 변환한 뒤 예측",
+        "예측된 대여량(연속값)을 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "load_model + rs.transform → 예측 ≈ [203.2, 15.0, 114.2] (여름퇴근 / 겨울새벽 / 가을정오)",
+      "code": "new_data = np.array([\n    [0, 1, 28.0, 45.0, 3.0, 18, 2, 0, 0, 1, 0],   # 여름·퇴근피크\n    [0, 0,  4.0, 80.0, 9.0,  3, 6, 0, 0, 0, 1],   # 겨울·새벽\n    [0, 1, 17.0, 60.0, 4.0, 12, 3, 1, 0, 0, 0],   # 가을·정오\n])\n\nbest = load_model('best_model.keras')\nnew_scaled = rs.transform(new_data)   # 학습과 동일 스케일러 재사용\npred = best.predict(new_scaled).flatten()\nprint(pred)\n\n# 예상 출력: 약 [203.2, 15.0, 114.2] (단위: 건)",
+      "explanation": "ModelCheckpoint가 저장한 best_model.keras를 load_model로 불러옵니다. 신규 데이터는 반드시 학습에 쓴 동일 스케일러(rs)로 transform만 적용합니다. 회귀이므로 argmax 없이 연속값을 그대로 사용합니다(.flatten()으로 (N,1)→(N,)). ①여름·퇴근피크(18시)·고온 → 가장 높음(≈203), ②겨울·새벽(3시)·저온 → 가장 낮음(≈15), ③가을·정오 → 중간(≈114)으로, Q4~5에서 본 계절·기온·시간대 효과와 정확히 일치합니다.",
+      "tip": "회귀 예측은 연속값 그대로(argmax/임계값 없음). 신규 데이터도 학습 스케일러(rs)로 transform만. .flatten()으로 1차원 변환."
+    }
+  ]
+}

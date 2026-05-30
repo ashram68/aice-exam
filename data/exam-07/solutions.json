@@ -1,0 +1,254 @@
+{
+  "examId": "exam-07",
+  "title": "AICE Associate 모의고사 7회 — 건강보험료 예측",
+  "subtitle": "회귀 (Regression) · 100점 · 14문항",
+  "dataset": "insurance_charges.csv",
+  "domain": "건강보험료 예측 (Health Insurance Charges)",
+  "targetVariable": "charges (연간 보험료)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 30, "range": "Q1~Q6"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q7~Q10"},
+    {"name": "AI 모델링", "points": 40, "range": "Q11~Q14"}
+  ],
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom scipy import stats\nfrom sklearn.impute import KNNImputer\nfrom sklearn.preprocessing import OneHotEncoder, PowerTransformer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error\n\n# 데이터 로드\ndf = pd.read_csv('./insurance_charges.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "필요 라이브러리 import",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "이번 분석에 필요한 라이브러리를 import하세요.",
+        "조건: 결측치 대치(KNNImputer), 원핫 인코딩(OneHotEncoder), 스케일링(PowerTransformer), 데이터 분할(train_test_split), 회귀 모델(LinearRegression, RandomForestRegressor), 시각화(seaborn)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "KNNImputer / OneHotEncoder / PowerTransformer / LinearRegression / RandomForestRegressor + 회귀 지표",
+      "code": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom scipy import stats\nfrom sklearn.impute import KNNImputer\nfrom sklearn.preprocessing import OneHotEncoder, PowerTransformer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error",
+      "explanation": "회귀 과제이므로 분류용 지표 대신 mean_squared_error·r2_score·mean_absolute_error를 사용합니다. 결측치는 KNNImputer(sklearn.impute), 범주형은 OneHotEncoder, 스케일링은 PowerTransformer(sklearn.preprocessing), 선형/앙상블 회귀는 LinearRegression(linear_model)·RandomForestRegressor(ensemble)를 import합니다. z-score용 scipy.stats도 포함합니다.",
+      "tip": "모듈 경로 암기: impute(KNNImputer), preprocessing(OneHotEncoder·PowerTransformer), linear_model(LinearRegression), ensemble(RandomForestRegressor), metrics(회귀 3종)."
+    },
+    {
+      "id": 2,
+      "title": "데이터 구성 및 특성 파악 (info)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "데이터의 전체 행·열 개수, 각 컬럼의 자료형과 결측치(non-null) 현황을 한 번에 확인하는 코드를 작성하세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df.info() — 2000행 8열, age 1950·bmi 1930 non-null",
+      "code": "df.info()\n# 전체 2000행 8열. age(1950)·bmi(1930)에 결측. object 4개 / 수치형 4개.",
+      "explanation": "df.info()로 행·열 수, non-null 개수, dtype을 한 번에 확인합니다. 전체 2,000행 8열이며 age(1,950)·bmi(1,930)에 결측치가 있고, 범주형(object) 4개·수치형 4개로 구성됩니다. customer_id는 식별자로 학습에서 제외해야 합니다.",
+      "tip": "df.info()(구조·결측·dtype), df.describe()(수치 통계). 결측이 있는 컬럼(age, bmi)을 미리 파악해 전처리 전략을 세우세요."
+    },
+    {
+      "id": 3,
+      "title": "수치형 변수 기술통계 (describe)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "수치형 변수들의 기초 통계량(평균·표준편차·최솟값·사분위수·최댓값)을 한 번에 확인하는 코드를 작성하세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df.describe() — charges 평균 ≈28,870·최대 64,847, bmi 최대 61.8(이상치 의심)",
+      "code": "df.describe()\n# charges 평균 ≈28870, 최대 64847 (우측 긴 분포). bmi 최대 61.8 (이상치 가능성).",
+      "explanation": "df.describe()로 수치형 변수의 통계량을 확인합니다. 타깃 charges는 평균 약 28,870, 최대 64,847로 우측으로 긴(right-skewed) 분포입니다. bmi 최댓값 61.8이 평균(27.2) 대비 매우 커 이상치 가능성이 있어, 전처리(Q8 z-score)에서 점검합니다.",
+      "tip": "skewed 분포(charges)는 PowerTransformer 같은 변환이 유효. 평균 대비 극단적인 max(bmi 61.8)는 이상치 신호."
+    },
+    {
+      "id": 4,
+      "title": "데이터 품질 점검 (결측·중복)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "컬럼별 결측치 개수와 전체 중복 행 개수를 각각 확인하는 코드를 작성하세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df.isnull().sum() (age 50, bmi 70) / df.duplicated().sum() (0)",
+      "code": "print(df.isnull().sum())\nprint('중복 행 수:', df.duplicated().sum())\n# 결측: age 50, bmi 70 / 중복 행: 0",
+      "explanation": "df.isnull().sum()은 컬럼별 결측치 개수를, df.duplicated().sum()은 완전히 동일한 중복 행의 개수를 반환합니다. 결측은 age 50개·bmi 70개로 두 수치형 변수에 분포하며 중복 행은 없습니다. 결측은 다음 단계에서 KNNImputer로 대치합니다.",
+      "tip": "isnull().sum()(컬럼별 결측), isnull().sum().sum()(전체 결측), duplicated().sum()(중복 행 수). drop_duplicates()로 중복 제거."
+    },
+    {
+      "id": 5,
+      "title": "분포 시각화 — kdeplot (hue=smoker)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "seaborn의 kdeplot으로 보험료(charges)의 분포를 흡연 여부(smoker)별로 구분(hue)하여 시각화하세요.",
+        "영역을 채워(fill=True) 표현"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.kdeplot(data=df, x='charges', hue='smoker', fill=True)",
+      "code": "plt.figure(figsize=(7,4.5))\nsns.kdeplot(data=df, x='charges', hue='smoker', fill=True, alpha=0.4)\nplt.title('보험료 분포 — 흡연여부별')\nplt.show()\n# 흡연자 평균 ≈50,900 vs 비흡연자 ≈23,500 — 흡연이 핵심 요인",
+      "explanation": "kdeplot은 커널 밀도 추정으로 연속 변수의 분포를 부드러운 곡선으로 그립니다. fill=True로 영역을 채우고 hue=smoker로 그룹을 구분합니다. 흡연자(Yes)의 보험료가 비흡연자(No)보다 뚜렷이 고액(평균 약 50,900 vs 23,500)에 분포해, 흡연 여부가 보험료의 핵심 결정 요인임을 보여줍니다.",
+      "tip": "histplot(빈도 막대), kdeplot(밀도 곡선), fill=True로 영역 채움. hue로 그룹별 분포 비교."
+    },
+    {
+      "id": 6,
+      "title": "변수 관계 시각화 — pairplot (hue=smoker)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "seaborn의 pairplot으로 수치형 변수(age, bmi, charges)들의 상호 관계를 흡연 여부(smoker)로 색을 구분(hue)하여 한 번에 시각화하세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.pairplot(df[['age','bmi','charges','smoker']].dropna(), hue='smoker')",
+      "code": "sns.pairplot(df[['age', 'bmi', 'charges', 'smoker']].dropna(), hue='smoker')\nplt.show()\n# age↑ → charges↑ 양의 관계, 흡연 그룹이 전 구간 고액",
+      "explanation": "pairplot은 여러 수치형 변수의 모든 짝(pair) 산점도와 대각선의 분포를 격자로 한 번에 보여줍니다. hue=smoker로 흡연 그룹을 색 구분합니다. age가 증가할수록 charges가 우상향하는 양의 관계가 보이고, 흡연 그룹이 전 구간에서 더 높은 보험료대를 형성합니다(결측 행은 dropna로 제외).",
+      "tip": "pairplot은 변수 간 관계를 한눈에 보는 EDA 도구(계산량 큼 → 변수 수 제한). hue로 그룹 비교, dropna()로 결측 제외."
+    },
+    {
+      "id": 7,
+      "title": "결측치 처리 — KNNImputer",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "식별자 customer_id를 제거하고, 수치형 변수(age, bmi, children)의 결측치를 KNNImputer(이웃 수 5)로 대치하세요.",
+        "대치 후 전체 결측치 합계를 출력하여 0임을 확인"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "drop customer_id + KNNImputer(n_neighbors=5) fit_transform → 총 결측 0",
+      "code": "df = df.drop(columns=['customer_id'])\nnum_cols = ['age', 'bmi', 'children']\nimputer = KNNImputer(n_neighbors=5)\ndf[num_cols] = imputer.fit_transform(df[num_cols])\nprint('총 결측치:', df.isnull().sum().sum())   # 0",
+      "explanation": "KNNImputer는 결측값을 가진 행과 가장 가까운 5개(n_neighbors=5) 이웃의 값으로 대치하여, 단순 평균/중앙값 대치보다 변수 간 관계를 반영합니다. 식별자 customer_id를 먼저 제거하고, 수치형 컬럼만 2차원(df[num_cols])으로 전달합니다. 대치 후 전체 결측치는 0이 됩니다.",
+      "tip": "KNNImputer는 거리 기반이라 수치형 컬럼에만 적용(범주형은 인코딩 후). n_neighbors가 클수록 부드러운 대치. SimpleImputer보다 관계 반영이 우수."
+    },
+    {
+      "id": 8,
+      "title": "이상치 처리 — z-score",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "수치형 변수(age, bmi, children)에 대해 표준점수(z-score)를 계산하고, 절댓값이 3을 초과하는 이상치가 하나라도 있는 행을 제거하세요.",
+        "제거 후 남은 행 수를 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "|z|<3 인 행만 유지 (all(axis=1)) → 남은 행 1988",
+      "code": "from scipy import stats\nnum_cols = ['age', 'bmi', 'children']\nz = np.abs(stats.zscore(df[num_cols]))\ndf = df[(z < 3).all(axis=1)].reset_index(drop=True)\nprint('남은 행 수:', len(df))   # 1988",
+      "explanation": "z-score = (값 - 평균) / 표준편차로, |z| > 3은 평균에서 3 표준편차 이상 벗어난 극단값입니다. (z < 3).all(axis=1)은 모든 수치형 변수에서 정상 범위인 행만 유지합니다(하나라도 이상치면 제거). bmi 극단값 등 12개 행이 제거되어 1,988행이 남습니다. reset_index로 인덱스를 재정렬합니다.",
+      "tip": "z-score 이상치 기준 |z|>3(또는 2.5). all(axis=1)=모든 변수 정상인 행 유지, any(axis=1)=하나라도 이상치인 행. IQR 방식과 함께 대표적 이상치 탐지법."
+    },
+    {
+      "id": 9,
+      "title": "원핫 인코딩 — OneHotEncoder",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "범주형 변수(gender, smoker, region)를 사이킷런의 OneHotEncoder로 원핫 인코딩한 뒤, 원본 범주형 컬럼을 제거하고 인코딩 결과를 데이터프레임에 결합하세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "OneHotEncoder(sparse_output=False) + get_feature_names_out + concat → (1988, 12)",
+      "code": "cat_cols = ['gender', 'smoker', 'region']\nohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')\nencoded = ohe.fit_transform(df[cat_cols])\nencoded_df = pd.DataFrame(\n    encoded,\n    columns=ohe.get_feature_names_out(cat_cols),\n    index=df.index\n)\ndf = pd.concat([df.drop(columns=cat_cols), encoded_df], axis=1)\nprint(df.shape)   # (1988, 12)",
+      "explanation": "사이킷런 OneHotEncoder는 각 범주를 0/1 이진 컬럼으로 분리합니다(gender→2, smoker→2, region→4). sparse_output=False로 밀집 배열을 받고, get_feature_names_out으로 컬럼명을 생성해 DataFrame으로 만든 뒤 원본 범주형을 제거하고 concat으로 결합합니다. pd.get_dummies와 결과는 유사하나, OneHotEncoder는 학습/추론 시 동일 인코딩을 재사용할 수 있는 객체라는 점이 다릅니다. 타깃 포함 총 12개 컬럼이 됩니다.",
+      "tip": "OneHotEncoder(객체, 재사용 가능, sparse_output=False·handle_unknown='ignore') vs pd.get_dummies(간편, 1회성). index 정렬 후 concat(axis=1). 명목형엔 라벨 인코딩보다 원핫이 적합."
+    },
+    {
+      "id": 10,
+      "title": "Train/Test 분할 · PowerTransformer 스케일링",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "charges를 타깃 y, 나머지를 피처 X로 분리하고 train_test_split으로 학습:평가 = 8:2 분할하세요 (random_state=42).",
+        "PowerTransformer로 스케일링 (학습데이터에 fit, 학습/평가에 transform)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "train_test_split(test_size=0.2, random_state=42) + PowerTransformer → (1590,11)(398,11)",
+      "code": "X = df.drop(columns=['charges'])\ny = df['charges']\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42\n)\nscaler = PowerTransformer()\nX_train = scaler.fit_transform(X_train)\nX_test = scaler.transform(X_test)\nprint(X_train.shape, X_test.shape)   # (1590, 11) (398, 11)",
+      "explanation": "회귀이므로 stratify 없이 8:2 분할합니다. PowerTransformer(기본 Yeo-Johnson)는 치우친(skewed) 분포를 정규분포에 가깝게 변환해 변수의 영향을 안정화합니다. 스케일러는 반드시 학습데이터로만 fit하고 평가데이터에는 transform만 적용해 정보 누수를 막습니다. 최종 피처는 11개입니다.",
+      "tip": "PowerTransformer(Yeo-Johnson/Box-Cox)는 skewed 변수 정규화에 강함. 회귀는 stratify 미사용. fit은 train만, test는 transform."
+    },
+    {
+      "id": 11,
+      "title": "머신러닝 회귀 모델 학습 (LR + RF)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "두 가지 회귀 모델을 학습하고 평가데이터를 예측하세요.",
+        "(1) LinearRegression → 예측값 lr_pred",
+        "(2) RandomForestRegressor(n_estimators=100, random_state=42) → 예측값 rf_pred"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LinearRegression → lr_pred / RandomForestRegressor(100) → rf_pred",
+      "code": "lr = LinearRegression()\nlr.fit(X_train, y_train)\nlr_pred = lr.predict(X_test)\n\nrf = RandomForestRegressor(n_estimators=100, random_state=42)\nrf.fit(X_train, y_train)\nrf_pred = rf.predict(X_test)",
+      "explanation": "선형회귀(LinearRegression)는 변수와 타깃의 선형 관계를 가정하는 해석 가능한 기본 모델이고, 랜덤포레스트 회귀(RandomForestRegressor)는 다수 트리를 앙상블해 비선형 관계도 포착합니다. 두 모델을 학습(fit)·예측(predict)해 다음 문항에서 성능을 비교합니다.",
+      "tip": "LinearRegression은 하이퍼파라미터가 거의 없는 baseline. 회귀는 항상 Regressor 사용. 두 모델 비교로 데이터에 선형/비선형 중 무엇이 적합한지 판단."
+    },
+    {
+      "id": 12,
+      "title": "모델 성능 평가 및 비교 (RMSE·R²·MAE)",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "두 모델(lr_pred, rf_pred)에 대해 RMSE, 결정계수(R²), MAE를 각각 계산해 출력하고, 어떤 모델이 더 우수한지 판단하세요.",
+        "(평가 코드를 직접 작성)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LinearRegression 근소 우수 (RMSE 2680.7·R² 0.9496 vs RF RMSE 2711.5·R² 0.9484)",
+      "code": "for name, pred in [('선형회귀', lr_pred), ('랜덤포레스트', rf_pred)]:\n    rmse = np.sqrt(mean_squared_error(y_test, pred))\n    r2 = r2_score(y_test, pred)\n    mae = mean_absolute_error(y_test, pred)\n    print(name)\n    print('  RMSE :', round(rmse, 1))\n    print('  R2   :', round(r2, 4))\n    print('  MAE  :', round(mae, 1))\n\n# 결과:\n# 선형회귀    RMSE 2680.7 / R2 0.9496 / MAE 2147.4\n# 랜덤포레스트 RMSE 2711.5 / R2 0.9484 / MAE 2156.3\n# → 선형회귀가 근소 우위 (RMSE·MAE 작고 R² 큼)",
+      "explanation": "회귀 평가 3종: RMSE(√평균제곱오차, 단위 동일·큰 오차에 민감), R²(결정계수, 1에 가까울수록 설명력↑), MAE(평균절대오차). 두 모델 모두 R² 약 0.95로 우수하며, 선형회귀(RMSE 2,680·R² 0.9496)가 랜덤포레스트(RMSE 2,711·R² 0.9484)보다 근소하게 앞섭니다. 보험료가 나이·BMI·흡연 등과 대체로 선형 관계라 단순한 선형회귀가 충분히 경쟁력 있음을 보여줍니다.",
+      "tip": "RMSE는 mean_squared_error에 np.sqrt. RMSE·MAE는 작을수록, R²는 클수록 우수. RMSE는 큰 오차에 민감, MAE는 균등 가중."
+    },
+    {
+      "id": 13,
+      "title": "딥러닝 회귀 모델 구축",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Dense, Input\ntf.random.set_seed(42)",
+      "problem": [
+        "모델 구조도를 참고하여 Keras Sequential 회귀 딥러닝 모델을 직접 작성하고 컴파일·학습하세요.",
+        "출력층은 회귀이므로 활성화 함수 없이 뉴런 1개, 손실은 mse",
+        "모델 구조: Input → Dense(64, relu) → Dense(32, relu) → Dense(1) (활성화 없음)",
+        "compile: optimizer='adam', loss='mse', metrics=['mae'] / fit: epochs=150, batch_size=32"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(Input→Dense64→Dense32→Dense1) + mse, epochs=150 → R² ≈ 0.9559",
+      "code": "model = Sequential([\n    Input(shape=(X_train.shape[1],)),\n    Dense(64, activation='relu'),\n    Dense(32, activation='relu'),\n    Dense(1)\n])\nmodel.compile(optimizer='adam', loss='mse', metrics=['mae'])\nmodel.fit(X_train, y_train, epochs=150, batch_size=32, verbose=1)\n\ndl_pred = model.predict(X_test).flatten()\nprint('R2 :', round(r2_score(y_test, dl_pred), 4))   # ≈ 0.9559",
+      "explanation": "회귀 신경망의 핵심: 출력층 Dense(1)에 활성화 함수를 두지 않아(linear) 연속값을 그대로 출력하고, 손실은 mse(평균제곱오차)를 씁니다. 분류의 sigmoid/softmax와 대비됩니다. 본 데이터에서 R² 약 0.9559로 머신러닝 모델과 대등하거나 근소 우위를 보입니다(딥러닝은 환경/초기값에 따라 수치 변동 가능).",
+      "tip": "회귀 출력층은 Dense(1) 활성화 없음(=linear) + loss='mse'. metrics=['mae']로 해석 쉬운 지표 모니터링. 회귀는 epochs를 충분히(150) 줘야 수렴."
+    },
+    {
+      "id": 14,
+      "title": "성능 개선 및 실제값-예측값 산점도",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "랜덤포레스트의 하이퍼파라미터를 조정(n_estimators=300, max_depth=10, min_samples_leaf=2)하여 성능을 개선하고, 개선 모델의 RMSE·R²를 기존과 비교하세요.",
+        "평가데이터의 실제값(x축)과 예측값(y축)을 산점도로 시각화하고, 완벽 예측을 의미하는 대각선(y=x)을 함께 표시"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "rf_best(300/10/leaf2) → RMSE 2636.6·R² 0.9513 (0.9484→0.9513 개선) + 산점도+대각선",
+      "code": "rf_best = RandomForestRegressor(\n    n_estimators=300, max_depth=10, min_samples_leaf=2, random_state=42\n)\nrf_best.fit(X_train, y_train)\nbest_pred = rf_best.predict(X_test)\nprint('개선 RMSE :', round(np.sqrt(mean_squared_error(y_test, best_pred)), 1))   # 2636.6\nprint('개선 R2   :', round(r2_score(y_test, best_pred), 4))                       # 0.9513\n\nplt.figure(figsize=(6, 6))\nplt.scatter(y_test, best_pred, alpha=0.4, edgecolor='w')\nlims = [y_test.min(), y_test.max()]\nplt.plot(lims, lims, 'r--')   # 대각선 y=x\nplt.xlabel('실제 보험료')\nplt.ylabel('예측 보험료')\nplt.title('실제값 vs 예측값 (개선된 랜덤포레스트)')\nplt.show()",
+      "explanation": "하이퍼파라미터 조정(n_estimators=300으로 트리 수 증가, max_depth=10·min_samples_leaf=2로 과적합 억제)으로 랜덤포레스트의 R²가 0.9484→0.9513으로 향상됩니다(RMSE 2,711→2,637). 실제값(x)-예측값(y) 산점도에서 점들이 대각선(y=x)에 밀집할수록 예측이 정확함을 의미하며, plt.plot(lims, lims, 'r--')로 완벽 예측 기준선을 그립니다. 고액 구간에서 약간의 편차가 보입니다.",
+      "tip": "회귀 진단 시각화: 실제 vs 예측 산점도 + y=x 대각선(점이 선에 가까울수록 정확). 하이퍼파라미터 튜닝(트리 수↑, 깊이 제한, leaf 제약)으로 과적합 억제·성능 개선."
+    }
+  ]
+}

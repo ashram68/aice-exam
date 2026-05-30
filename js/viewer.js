@@ -6,6 +6,7 @@
 (function () {
   const PROGRESS_KEY = 'aice_progress';
   let examData = null;
+  let examMeta = null; // exams.json의 해당 회차 메타 (colabUrl 단일 출처)
   let currentQ = 0;
   let examId = '';
   let answered = {}; // Track which questions have been answered this session
@@ -125,7 +126,7 @@
         <div class="card text-center mt-xl" style="background: var(--color-primary-container); border: 2px solid var(--color-primary);" id="completion-card">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🎓</div>
           <h2 style="color: var(--color-on-primary-container); margin-bottom: 0.5rem;">
-            ${allDone ? '모의고사 1회를 모두 완료했습니다!' : '마지막 문제입니다'}
+            ${allDone ? `${(examMeta && examMeta.title) || '모의고사'}를 모두 완료했습니다!` : '마지막 문제입니다'}
           </h2>
           <p class="text-sm" style="color: var(--color-on-primary-container); opacity: 0.8; margin-bottom: 1.5rem;">
             ${allDone ? `총 ${total}문항 학습 완료` : `${viewedCount}/${total} 문항 학습 완료`}
@@ -376,12 +377,15 @@
       `;
     }
 
-    const colabUrl = 'https://colab.research.google.com/github/ashram68/aice-exam/blob/main/data/exam-01/AICE_%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC_1%ED%9A%8C_Titanic.ipynb';
-    const actionsHtml = `
-      <div class="flex flex-wrap gap-sm mt-lg">
+    // colabUrl은 exams.json(examMeta)에서 회차별로 가져온다. '#'/누락 시 버튼 숨김.
+    const colabUrl = (examMeta && examMeta.colabUrl && examMeta.colabUrl !== '#') ? examMeta.colabUrl : '';
+    const colabBtnHtml = colabUrl ? `
         <a href="${colabUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" onclick="event.preventDefault(); if(window.openColabWithNotice){openColabWithNotice(this.href);}else{window.open(this.href,'_blank','noopener');} return false;">
           🔗 Google Colab 실습
-        </a>
+        </a>` : '';
+    const actionsHtml = `
+      <div class="flex flex-wrap gap-sm mt-lg">
+        ${colabBtnHtml}
         <button class="btn btn-secondary btn-sm" onclick="openSearch()">
           🔍 라이브러리 문서 검색
         </button>
@@ -410,7 +414,7 @@
 
         <div class="tip-box mt-lg">
           <span class="tip-icon">📌</span>
-          <span>이 코드는 pandas, numpy, matplotlib를 임포트하고 titanic.csv 데이터를 df 변수로 로드합니다. 모든 문항에서 이 변수들을 사용합니다.</span>
+          <span>이 코드는 분석에 필요한 라이브러리(pandas, numpy, seaborn 등)를 불러옵니다. 모든 문항을 풀기 전에 먼저 실행하세요.</span>
         </div>
 
         <div style="margin-top: 2rem;">
@@ -478,9 +482,15 @@
   }
 
   // --- Init ---
-  fetch(`data/${examId}/solutions.json`)
-    .then(r => r.json())
-    .then(data => {
+  // exams.json(메타)와 solutions.json(콘텐츠)를 함께 로드. colabUrl은 exams.json에서만 관리.
+  Promise.all([
+    fetch('data/exams.json').then(r => r.json()).catch(() => null),
+    fetch(`data/${examId}/solutions.json`).then(r => r.json())
+  ])
+    .then(([examsList, data]) => {
+      if (examsList && Array.isArray(examsList.exams)) {
+        examMeta = examsList.exams.find(e => e.id === examId) || null;
+      }
       examData = data;
       renderSidebar();
       updateHeaderProgress();

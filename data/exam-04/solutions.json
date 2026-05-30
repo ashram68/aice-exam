@@ -1,0 +1,298 @@
+{
+  "examId": "exam-04",
+  "title": "AICE Associate 모의고사 4회 — 멤버십 등급 예측",
+  "subtitle": "다중 분류 (Multi-class) · 100점 · 14문항",
+  "dataset": "customer_tier_mc.csv",
+  "domain": "이커머스 고객관리",
+  "targetVariable": "membership_tier (Bronze=0, Gold=1, Silver=2)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 20, "range": "Q1~Q4"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q5~Q8"},
+    {"name": "AI 모델링", "points": 50, "range": "Q9~Q14"}
+  ],
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./customer_tier_mc.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "pandas 라이브러리 불러오기 (alias pd)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "pandas를 사용할 수 있게 별칭(alias)을 pd로 해서 불러오세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "import pandas as pd",
+      "code": "import pandas as pd",
+      "explanation": "import 라이브러리 as 별칭 문법. pandas의 관례 별칭은 pd. 자주 쓰는 alias: pandas→pd, numpy→np, seaborn→sns, matplotlib.pyplot→plt, sklearn→sk.",
+      "tip": "자주 나오는 오답: 'import pandas pd' (as 누락), 'import pd as pandas' (순서 반대)."
+    },
+    {
+      "id": 2,
+      "title": "데이터 파일(customer_tier_mc.csv) 읽어오기",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "pandas로 데이터 파일을 읽어온 뒤, 데이터프레임 변수명 df에 할당하고 첫 4개 행을 출력하세요.",
+        "데이터프레임 변수명: df",
+        "데이터 파일명: customer_tier_mc.csv (동일 경로)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df = pd.read_csv('./customer_tier_mc.csv'); df.head(4)",
+      "code": "df = pd.read_csv('./customer_tier_mc.csv')\ndf.head(4)",
+      "explanation": "pd.read_csv()로 CSV를 읽고 df에 할당, head(4)로 첫 4개 행을 확인합니다. 타겟 membership_tier는 Bronze/Silver/Gold 3개 클래스의 다중분류 문제입니다.",
+      "tip": "head() 괄호 안 숫자 미지정 시 기본 5행. 문항이 4개 행을 요구하면 head(4)."
+    },
+    {
+      "id": 3,
+      "title": "주문 수-리뷰 수 관계 jointplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "seaborn의 jointplot으로 주문 수(num_orders)와 리뷰 수(num_reviews)의 관계 및 각 분포를 함께 그리세요.",
+        "대상 데이터프레임: df",
+        "X축: num_orders, Y축: num_reviews"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.jointplot(data=df, x='num_orders', y='num_reviews')",
+      "code": "sns.jointplot(data=df, x='num_orders', y='num_reviews')\nplt.show()",
+      "explanation": "jointplot은 두 수치형 변수의 산점도(중앙)와 각 변수의 분포 히스토그램(가장자리)을 함께 보여줍니다. 두 변수의 관계와 개별 분포를 동시에 파악할 때 유용합니다. kind 옵션으로 'hex', 'kde', 'reg' 등 형태 변경 가능.",
+      "tip": "jointplot은 Figure 단위 함수. scatterplot(관계만), jointplot(관계+분포), pairplot(여러 변수 조합)."
+    },
+    {
+      "id": 4,
+      "title": "수치형 변수 상관관계 heatmap",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(4-1) seaborn의 heatmap으로 수치형 변수 간 상관관계를 시각화하세요.",
+        "대상 데이터프레임: df",
+        "df.corr(numeric_only=True)로 상관계수를 구한 뒤 heatmap으로 그리세요",
+        "각 칸에 상관계수 값을 표시 (annot=True)",
+        "(4-2) 주문 수(num_orders)와 상관계수가 가장 높은(자기 자신 제외) 변수는?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(4-1) heatmap(df.corr(numeric_only=True), annot=True) / (4-2) tenure_months",
+      "code": "# (4-1)\ncorr = df.corr(numeric_only=True)\nsns.heatmap(corr, annot=True, cmap='coolwarm')\nplt.show()\n\n# (4-2) 답안: tenure_months\n# → num_orders와 tenure_months의 상관이 가장 높음",
+      "explanation": "df.corr(numeric_only=True)는 수치형 컬럼 간 피어슨 상관계수 행렬을 반환합니다(numeric_only=True로 범주형 제외). heatmap의 annot=True로 각 셀에 상관계수를 표시합니다. num_orders와 가장 상관이 높은 변수는 tenure_months(가입 기간) — 오래 쓴 고객일수록 주문 수가 많습니다.",
+      "tip": "상관계수는 -1~1. cmap='coolwarm'은 양/음 상관을 빨강/파랑으로 표현. 자기 자신과의 상관은 항상 1이므로 (4-2)에서 제외."
+    },
+    {
+      "id": 5,
+      "title": "불필요 컬럼 삭제 (cust_id, signup_date)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "AI 모델링에 불필요한 컬럼을 삭제하세요.",
+        "대상 데이터프레임: df",
+        "삭제 대상: cust_id(단순 식별자), signup_date(가입일자 문자열)",
+        "결과를 data_temp 변수명으로 저장하고 shape를 출력하세요"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "data_temp = df.drop(columns=['cust_id', 'signup_date'])",
+      "code": "data_temp = df.drop(columns=['cust_id', 'signup_date'])\nprint(data_temp.shape)",
+      "explanation": "drop(columns=[...])로 식별자(cust_id)와 모델에 직접 쓰기 어려운 날짜 문자열(signup_date)을 제거합니다. shape로 (행, 열) 변화를 확인하세요. 날짜를 피처로 쓰려면 별도 파싱(연/월 추출 등)이 필요하지만 본 문항은 단순 삭제를 요구합니다.",
+      "tip": "drop(columns=[...])는 열 삭제, drop(인덱스)는 행 삭제. 문자열 날짜는 그대로 모델에 넣을 수 없어 보통 삭제하거나 파생 변수로 변환."
+    },
+    {
+      "id": 6,
+      "title": "결측치 처리 오류 정정 (최빈값 mode()[0])",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "(6-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상 데이터프레임: data_temp",
+        "지역(region)과 기기(device) 컬럼(범주형)의 결측치를 각 컬럼의 최빈값(mode)으로 채우세요",
+        "전처리가 반영된 데이터프레임은 data_na에 저장하세요",
+        "오류 코드 원본:",
+        "fillna(...mode())  — mode() → mode()[0] 으로 수정 (region, device 모두)",
+        "(6-2) region 컬럼의 최빈값은 무엇인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(6-1) mode() → mode()[0] / (6-2) Seoul",
+      "code": "# (6-1) 오류 정정\nprint('결측치 처리 전\\n', data_temp.isnull().sum())\ndata_temp['region'] = data_temp['region'].fillna(data_temp['region'].mode()[0])\ndata_temp['device'] = data_temp['device'].fillna(data_temp['device'].mode()[0])\ndata_na = data_temp\nprint('\\n결측치 처리 후\\n', data_na.isnull().sum())\n\n# (6-2) 답안: Seoul  (region 최빈값)",
+      "explanation": "mode()는 최빈값이 여러 개일 수 있어 Series를 반환하므로, fillna에 넘기려면 mode()[0]으로 첫 번째 값을 추출해야 합니다. mode()만 쓰면 인덱스 정렬 문제로 결측치가 제대로 채워지지 않습니다. region의 최빈값은 Seoul입니다. 범주형 결측치는 최빈값(mode), 수치형은 평균/중앙값으로 채우는 것이 일반적입니다.",
+      "tip": "mode()[0] 의 [0]을 빠뜨리는 시험 단골 함정. 범주형(object) → mode()[0], 수치형 → mean()/median()."
+    },
+    {
+      "id": 7,
+      "title": "원-핫 인코딩 (get_dummies)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "범주형 데이터를 이진형 벡터로 변환하는 코드를 완성하세요.",
+        "대상 데이터프레임: data_na",
+        "원-핫 인코딩 대상: region, device",
+        "결과를 data_preset에 저장하고 info()로 검증",
+        "빈칸 코드: data_preset = pd.<#7-1>(data=data_na, <#7-2>=['region', 'device'])",
+        "(7-1) 첫 번째 빈칸에 들어갈 함수명은?",
+        "(7-2) 두 번째 빈칸에 들어갈 옵션명은?",
+        "(7-3) data_preset의 전체 컬럼 개수는 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(7-1) get_dummies / (7-2) columns / (7-3) 15",
+      "code": "data_preset = pd.get_dummies(\n    data=data_na,\n    columns=['region', 'device']\n)\ndata_preset.info()\n\n# 답안\n# (7-1) get_dummies\n# (7-2) columns\n# (7-3) 15  (원-핫 인코딩 후 전체 컬럼 개수)",
+      "explanation": "pd.get_dummies(columns=['region','device'])로 두 범주형 컬럼을 원-핫 인코딩합니다. 본 문항은 drop_first를 지정하지 않으므로 각 범주가 모두 더미 컬럼이 됩니다. 수치형 컬럼과 합쳐 전체 15개 컬럼이 됩니다.",
+      "tip": "drop_first를 쓰지 않으면 N개 범주 → N개 더미(컬럼 수 증가). 문항이 drop_first를 요구하지 않으면 추가하지 마세요 — (7-3) 컬럼 개수가 달라집니다."
+    },
+    {
+      "id": 8,
+      "title": "타겟 인코딩 + 데이터 분리 + MinMaxScaler",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "타겟을 인코딩하고, 훈련/검증 데이터셋을 분리한 뒤 스케일링하세요.",
+        "대상 데이터프레임: data_preset",
+        "타겟 membership_tier를 LabelEncoder로 정수 인코딩 (Bronze=0, Gold=1, Silver=2)",
+        "membership_tier를 레이블 y, 나머지를 피처 X로 할당",
+        "훈련:검증 = 80:20, random_state=42, stratify로 등급 비율 유지 (X_train, X_valid, y_train, y_valid)",
+        "MinMaxScaler를 ms 변수에 지정 → 훈련데이터로 fit_transform, 검증데이터는 transform만",
+        "마지막에 X_train, X_valid의 shape 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LabelEncoder(Bronze=0/Gold=1/Silver=2) + 80:20 stratify + MinMaxScaler(ms)",
+      "code": "from sklearn.preprocessing import LabelEncoder, MinMaxScaler\nfrom sklearn.model_selection import train_test_split\n\nle = LabelEncoder()\ndata_preset['membership_tier'] = le.fit_transform(data_preset['membership_tier'])\n\nX = data_preset.drop('membership_tier', axis=1)\ny = data_preset['membership_tier']\n\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y\n)\n\nms = MinMaxScaler()\nX_train = ms.fit_transform(X_train)\nX_valid = ms.transform(X_valid)\nprint(X_train.shape, X_valid.shape)",
+      "explanation": "LabelEncoder는 알파벳 순으로 정수를 부여합니다 → Bronze=0, Gold=1, Silver=2 (le.classes_ = ['Bronze','Gold','Silver']). 다중분류이므로 stratify=y로 3개 등급의 비율을 train/valid에 유지합니다. MinMaxScaler는 각 피처를 0~1 범위로 정규화합니다(StandardScaler/RobustScaler와 달리 최소-최대 기준).",
+      "tip": "LabelEncoder는 알파벳 순 정수 부여 — 의미 순서(Bronze<Silver<Gold)와 다를 수 있으니 le.classes_로 매핑 확인. 스케일러 3종: Standard(평균0/표준편차1), MinMax(0~1), Robust(중앙값/IQR)."
+    },
+    {
+      "id": 9,
+      "title": "DecisionTree + RandomForest 모델 학습",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(9-1) DecisionTree 모델을 dt 변수에 저장하고 훈련셋으로 학습",
+        "max_depth=5, min_samples_split=3, random_state=42",
+        "(9-2) RandomForest 모델을 rf 변수에 저장하고 훈련셋으로 학습",
+        "n_estimators=100, max_depth=5, min_samples_split=3, random_state=42"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "DecisionTreeClassifier + RandomForestClassifier 학습 완료",
+      "code": "# (9-1) DecisionTree\nfrom sklearn.tree import DecisionTreeClassifier\ndt = DecisionTreeClassifier(\n    max_depth=5,\n    min_samples_split=3,\n    random_state=42\n)\ndt.fit(X_train, y_train)\n\n# (9-2) RandomForest\nfrom sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(\n    n_estimators=100,\n    max_depth=5,\n    min_samples_split=3,\n    random_state=42\n)\nrf.fit(X_train, y_train)",
+      "explanation": "다중분류도 동일한 트리 기반 Classifier를 사용합니다 — DecisionTreeClassifier, RandomForestClassifier는 클래스 수에 관계없이 자동으로 다중분류를 처리합니다(별도 옵션 불필요). 타겟이 0/1/2 세 값이면 자동으로 3-클래스 분류로 학습됩니다.",
+      "tip": "트리 기반 모델은 이진/다중분류 모두 동일 클래스로 처리(자동). 회귀만 Regressor로 구분. 평가 단계에서 다중분류는 average 옵션이 필요(Q10 참고)."
+    },
+    {
+      "id": 10,
+      "title": "다중분류 평가 오류 정정 (F1 average='macro')",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(10-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "성능 평가는 검증데이터셋을 활용",
+        "각 모델의 Accuracy를 dt_acc, rf_acc에, F1-score를 dt_f1, rf_f1에 저장하고 출력",
+        "다중분류이므로 F1-score는 average='macro' 옵션을 사용",
+        "오류 코드: f1_score(y_valid, y_pred_dt) — average='macro' 옵션 추가로 수정",
+        "(10-2) 두 모델의 F1-score를 비교했을 때 더 우수한 모델은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(10-1) f1_score에 average='macro' 추가 / (10-2) DecisionTree (dt_f1 0.859 > rf_f1 0.853)",
+      "code": "# (10-1) 오류 정정\nfrom sklearn.metrics import accuracy_score, f1_score\n\ny_pred_dt = dt.predict(X_valid)\ny_pred_rf = rf.predict(X_valid)\n\ndt_acc = accuracy_score(y_valid, y_pred_dt)\nrf_acc = accuracy_score(y_valid, y_pred_rf)\ndt_f1 = f1_score(y_valid, y_pred_dt, average='macro')\nrf_f1 = f1_score(y_valid, y_pred_rf, average='macro')\nprint(dt_acc, rf_acc, dt_f1, rf_f1)\n\n# (10-2) 답안: DecisionTree (dt_f1 0.859 vs rf_f1 0.853)",
+      "explanation": "f1_score는 이진분류 기본 동작이라 다중분류(3-클래스)에서는 average 옵션이 없으면 ValueError가 발생합니다. average='macro'는 각 클래스의 F1을 단순 평균(클래스 불균형 무시), 'weighted'는 클래스 빈도 가중 평균입니다. 본 문항에서는 DecisionTree(dt_f1 0.859)가 RandomForest(rf_f1 0.853)보다 근소하게 우수합니다.",
+      "tip": "다중분류 f1_score/precision/recall은 average 필수: 'macro'(클래스 균등), 'micro'(전체 집계), 'weighted'(빈도 가중). accuracy_score는 average 불필요."
+    },
+    {
+      "id": 11,
+      "title": "classification_report (클래스별 성능)",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "다중분류 모델의 클래스별 성능을 자세히 분석하세요.",
+        "검증데이터에 대한 RandomForest 예측 결과로 classification_report를 출력",
+        "sklearn.metrics의 classification_report 함수 사용",
+        "각 등급(클래스)별 precision, recall, f1-score를 확인"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "print(classification_report(y_valid, y_pred_rf))",
+      "code": "from sklearn.metrics import classification_report\nprint(classification_report(y_valid, y_pred_rf))",
+      "explanation": "classification_report는 각 클래스별 precision(정밀도), recall(재현율), f1-score, support(표본 수)와 전체 accuracy, macro/weighted 평균을 한 번에 표로 출력합니다. 다중분류에서 어떤 등급을 잘/못 맞히는지 클래스별로 진단할 때 핵심 도구입니다.",
+      "tip": "classification_report(정답, 예측)은 문자열을 반환하므로 print()로 감싸야 표 형태로 보입니다. confusion_matrix와 함께 보면 오분류 패턴까지 파악 가능."
+    },
+    {
+      "id": 12,
+      "title": "딥러닝 다중분류 모델 (softmax 3노드)",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout\nfrom tensorflow.keras.callbacks import EarlyStopping\nfrom tensorflow.keras.utils import to_categorical\ntf.random.set_seed(1)",
+      "problem": [
+        "아래 토폴로지와 가이드를 참고해 딥러닝 다중분류 모델을 구성·학습하세요.",
+        "먼저 to_categorical로 타겟을 원-핫 벡터로 변환 (실행 필수, 3개 클래스)",
+        "모델 토폴로지: 입력층 → Dense(128, relu) → Dropout(0.3) → Dense(64, relu) → Dense(32, relu) → Dense(3, softmax)",
+        "히든 activation='relu', 출력층 activation='softmax' (3노드)",
+        "EarlyStopping: monitor='val_loss', patience=5, restore_best_weights=True → estop",
+        "compile: optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']",
+        "fit: batch_size=32, epochs=50, validation_data, callbacks=[estop] → history"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(128→Dropout→64→32→softmax3) + categorical_crossentropy",
+      "code": "# 타겟 원-핫 변환 (실행 필수, 3개 클래스)\ny_train = to_categorical(y_train, num_classes=3)\ny_valid = to_categorical(y_valid, num_classes=3)\n\nmodel = Sequential([\n    Dense(128, activation='relu', input_dim=X_train.shape[1]),\n    Dropout(0.3),\n    Dense(64, activation='relu'),\n    Dense(32, activation='relu'),\n    Dense(3, activation='softmax')\n])\nestop = EarlyStopping(\n    monitor='val_loss',\n    patience=5,\n    restore_best_weights=True\n)\nmodel.compile(\n    optimizer='adam',\n    loss='categorical_crossentropy',\n    metrics=['accuracy']\n)\nhistory = model.fit(\n    X_train, y_train,\n    validation_data=(X_valid, y_valid),\n    batch_size=32,\n    epochs=50,\n    callbacks=[estop]\n)",
+      "explanation": "다중분류 딥러닝의 출력층은 클래스 수만큼의 노드 + softmax입니다: Dense(3, softmax). 타겟은 to_categorical로 원-핫(3차원)으로 변환하고 loss='categorical_crossentropy'를 씁니다. (원-핫 없이 정수 타겟을 쓰려면 loss='sparse_categorical_crossentropy'). softmax는 각 클래스 확률의 합이 1이 되도록 출력합니다.",
+      "tip": "출력층 결정: 이진→Dense(1,sigmoid)/Dense(2,softmax), 다중(N클래스)→Dense(N,softmax), 회귀→Dense(1,linear). 원-핫 타겟→categorical_crossentropy, 정수 타겟→sparse_categorical_crossentropy."
+    },
+    {
+      "id": 13,
+      "title": "학습/검증 Accuracy 시각화",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "matplotlib로 학습/검증 Accuracy의 변화를 그래프로 시각화하세요.",
+        "1개 그래프에 학습 Accuracy와 검증 Accuracy 모두 표시",
+        "범례: 'acc', 'val_acc' / 타이틀: 'Model Accuracy' / X축: 'Epoch', Y축: 'Accuracy'",
+        "빈칸 코드: plt.plot(<#13-1>['accuracy']) ... plt.<#13-2>(['acc', 'val_acc'])",
+        "(13-1) 첫 번째 빈칸에 들어갈 객체는?",
+        "(13-2) 두 번째 빈칸에 들어갈 함수명은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(13-1) history.history / (13-2) legend",
+      "code": "plt.plot(history.history['accuracy'])\nplt.plot(history.history['val_accuracy'])\nplt.title('Model Accuracy')\nplt.xlabel('Epoch')\nplt.ylabel('Accuracy')\nplt.legend(['acc', 'val_acc'])\nplt.show()\n\n# 답안\n# (13-1) history.history\n# (13-2) legend",
+      "explanation": "history.history 딕셔너리에 epoch별 지표가 저장됩니다. metrics=['accuracy']이므로 키는 'accuracy'(훈련), 'val_accuracy'(검증). plt.legend([...])로 범례를 답니다. 학습/검증 정확도가 함께 상승하면 학습이 잘 되는 것이며, 검증 정확도가 정체/하락하면 과적합 신호입니다.",
+      "tip": "history.history 키: metrics=['accuracy']면 'accuracy','val_accuracy'. 범례 함수는 plt.legend()."
+    },
+    {
+      "id": 14,
+      "title": "모델 저장/로드 후 신규 고객 등급 예측",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "학습한 딥러닝 모델을 저장한 뒤 load_model()로 불러와 신규 고객의 멤버십 등급을 예측하세요.",
+        "주어진 new_raw(신규 고객 2명)는 그대로 사용",
+        "model을 'tier_model.keras'로 저장 → load_model()로 불러오기",
+        "new_raw를 학습 때와 동일하게 전처리: 원-핫 인코딩 후 학습 피처 컬럼(X.columns)에 맞춰 정렬 → ms로 스케일링",
+        "불러온 모델로 예측한 확률에서 가장 높은 클래스를 선택 → 등급(Bronze/Silver/Gold)으로 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "예측 결과 ['Gold', 'Bronze'] (1번 장기·다주문·무불만 → Gold / 2번 단기·소주문·불만 → Bronze)",
+      "code": "new_raw = pd.DataFrame([\n    {'age':41, 'tenure_months':60, 'num_orders':52, 'avg_order_value':14.0, 'num_reviews':22,\n     'complaint_count':0, 'region':'Seoul', 'device':'PC'},\n    {'age':27, 'tenure_months':6, 'num_orders':4, 'avg_order_value':5.0, 'num_reviews':1,\n     'complaint_count':3, 'region':'Busan', 'device':'Mobile'},\n])\n\nmodel.save('tier_model.keras')\nloaded_model = load_model('tier_model.keras')\n\nnew_enc = pd.get_dummies(new_raw)\nnew_enc = new_enc.reindex(columns=X.columns, fill_value=0)  # 학습 피처와 컬럼 정렬\nnew_scaled = ms.transform(new_enc)\n\nproba = loaded_model.predict(new_scaled)\npred = proba.argmax(axis=1)\nresult = [le.classes_[i] for i in pred]   # 0=Bronze, 1=Gold, 2=Silver\nprint(result)\n\n# 예상 출력: ['Gold', 'Bronze']",
+      "explanation": "다중분류 신규 예측의 핵심: (1) get_dummies 후 reindex(columns=X.columns, fill_value=0)로 학습 피처 구성에 정렬, (2) 학습된 ms로 transform만, (3) softmax 출력이므로 argmax(axis=1)로 최고 확률 클래스를 선택, (4) le.classes_[정수]로 정수를 다시 등급명으로 역변환. 1번(장기·다주문·무불만)은 Gold, 2번(단기·소주문·불만)은 Bronze로 예측됩니다.",
+      "tip": "정수 예측 → 등급명 역변환은 le.classes_[i] 또는 le.inverse_transform(pred). le.classes_ 순서(Bronze=0,Gold=1,Silver=2)를 정확히 기억하세요. reindex로 컬럼 정렬은 필수."
+    }
+  ]
+}

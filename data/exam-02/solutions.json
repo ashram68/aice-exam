@@ -1,0 +1,302 @@
+{
+  "examId": "exam-02",
+  "title": "AICE Associate 모의고사 2회 — 직원 이직 여부 예측",
+  "subtitle": "이진 분류 (Classification) · 100점 · 14문항",
+  "dataset": "hr_attrition_clf.csv",
+  "domain": "인사관리 (HR)",
+  "targetVariable": "attrition (No=0, Yes=1)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 20, "range": "Q1~Q4"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q5~Q8"},
+    {"name": "AI 모델링", "points": 50, "range": "Q9~Q14"}
+  ],
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./hr_attrition_clf.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "scikit-learn 라이브러리 불러오기 (alias sk)",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "scikit-learn을 사용할 수 있게 별칭(alias)을 sk로 해서 불러오세요."
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "import sklearn as sk",
+      "code": "import sklearn as sk",
+      "explanation": "import 라이브러리 as 별칭 문법. 1회는 pandas→pd를 물었지만 2회는 scikit-learn→sk를 묻습니다. 라이브러리명은 sklearn(scikit-learn의 패키지명), 관례 별칭은 sk. 자주 쓰는 alias: pandas→pd, numpy→np, seaborn→sns, matplotlib.pyplot→plt, sklearn→sk.",
+      "tip": "자주 나오는 오답: 'import scikit-learn as sk' (패키지명은 sklearn), 'import sklearn sk' (as 누락)."
+    },
+    {
+      "id": 2,
+      "title": "데이터 파일(hr_attrition_clf.csv) 읽어오기",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "pandas로 데이터 파일을 읽어온 뒤, 데이터프레임 변수명 df에 할당하고 첫 4개 행을 출력하세요.",
+        "데이터프레임 변수명: df",
+        "데이터 파일명: hr_attrition_clf.csv (동일 경로)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df = pd.read_csv('./hr_attrition_clf.csv'); df.head(4)",
+      "code": "df = pd.read_csv('./hr_attrition_clf.csv')\ndf.head(4)",
+      "explanation": "pd.read_csv()로 CSV를 읽습니다. 1회는 head(5)였지만 2회는 첫 4개 행(head(4))을 요구합니다 — 문항이 지정한 행 수를 정확히 따르세요. df.head(n): 첫 n개 행, df.tail(n): 마지막 n개 행, df.shape: (행, 열) 크기.",
+      "tip": "자주 나오는 오답: head() (괄호 안 4 누락 → 기본 5행), 따옴표 누락, pd. 누락."
+    },
+    {
+      "id": 3,
+      "title": "부서(department) 분포 countplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "(3-1) seaborn의 countplot으로 부서(department)의 분포를 그래프로 그리세요.",
+        "대상 데이터프레임: df",
+        "(3-2) 출력된 그래프에서 직원 수가 가장 많은 부서는 어디인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(3-1) countplot 시각화 / (3-2) R&D",
+      "code": "# (3-1) countplot 시각화\nsns.countplot(data=df, x='department')\nplt.show()\n\n# (3-2) 답안: R&D\n# → R&D 부서의 직원 수가 가장 많음",
+      "explanation": "countplot은 범주형 변수의 빈도(개수)를 막대그래프로 표시합니다. department는 Sales / R&D / HR 세 범주이며, R&D 부서의 직원 수가 가장 많습니다. hue 옵션으로 추가 범주 색상 구분 가능.",
+      "tip": "자주 나오는 오답: 'data=df' 명시 안 함, countplot 대신 barplot 사용(barplot은 집계값, countplot은 개수)."
+    },
+    {
+      "id": 4,
+      "title": "이직 여부별 월급 분포 boxplot",
+      "category": "데이터 분석",
+      "points": 5,
+      "type": "code",
+      "problem": [
+        "seaborn의 boxplot으로 이직 여부(attrition)별 월급(monthly_income)의 분포를 그래프로 그리세요.",
+        "대상 데이터프레임: df",
+        "X축: attrition, Y축: monthly_income"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.boxplot(data=df, x='attrition', y='monthly_income')",
+      "code": "sns.boxplot(data=df, x='attrition', y='monthly_income')\nplt.show()",
+      "explanation": "boxplot은 분포의 사분위수(Q1, 중앙값, Q3)와 이상치(IQR 밖의 점)를 한눈에 보여줍니다. 범주(attrition)별로 수치형(monthly_income) 분포를 비교할 때 유용합니다. 다음 문항(Q5)에서 여기서 확인된 monthly_income 이상치를 IQR 기준으로 제거합니다.",
+      "tip": "boxplot의 박스 위/아래로 벗어난 점이 이상치(outlier). violinplot은 분포 밀도까지 함께 표시."
+    },
+    {
+      "id": 5,
+      "title": "IQR 기반 이상치 제거 + emp_id 삭제 (data_temp)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "monthly_income 컬럼에서 발견된 이상치를 IQR 기준으로 제거하세요.",
+        "대상 데이터프레임: df",
+        "월급이 upper_fence보다 크거나 lower_fence보다 작은 행(row)을 삭제하세요",
+        "불필요한 직원ID(emp_id) 컬럼도 삭제하세요",
+        "결과를 data_temp 변수명으로 저장하세요",
+        "빈칸 코드: data_temp = df.<#5-1>( df[(...)].<#5-2> )",
+        "(5-1) 첫 번째 빈칸에 들어갈 메서드명은?",
+        "(5-2) 두 번째 빈칸에 들어갈 속성명은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(5-1) drop / (5-2) index",
+      "code": "q1 = df['monthly_income'].quantile(0.25)\nq3 = df['monthly_income'].quantile(0.75)\niqr = q3 - q1\nlower_fence = q1 - 1.5 * iqr\nupper_fence = q3 + 1.5 * iqr\n\ndata_temp = df.drop(\n    df[(df['monthly_income'] > upper_fence) | (df['monthly_income'] < lower_fence)].index\n)\ndata_temp = data_temp.drop(columns=['emp_id'])\n\n# 답안\n# (5-1) drop\n# (5-2) index",
+      "explanation": "IQR(InterQuartile Range) 이상치 기준: lower_fence = Q1 - 1.5*IQR, upper_fence = Q3 + 1.5*IQR. 이 범위를 벗어난 값이 이상치입니다. 행을 삭제하려면 조건에 맞는 행의 .index를 구해 df.drop(인덱스)에 넘깁니다 — drop은 기본적으로 '인덱스(행 라벨)'를 받기 때문입니다. 컬럼 삭제는 drop(columns=[...]).",
+      "tip": "df.drop()은 인덱스(행)를 받는 게 기본 — 조건 필터 결과의 .index를 넘겨야 행이 삭제됩니다. drop(columns=[...])는 열 삭제. 자주 나오는 오답: .index 누락(불리언 시리즈를 drop에 직접 넘기면 오류)."
+    },
+    {
+      "id": 6,
+      "title": "결측치 처리 오류 정정 (dropna)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "(6-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "대상 데이터프레임: data_temp",
+        "결측치가 있는 행을 모두 삭제하세요",
+        "전처리가 반영된 데이터프레임은 data_na에 저장하세요",
+        "오류 코드 원본:",
+        "data_na = data_temp.drop()  — drop() → dropna() 로 수정 (결측 행 삭제)",
+        "data_na.isnull().total()  — total() → sum() 으로 수정 (존재하지 않는 메서드)",
+        "(6-2) data_temp의 결측치 개수는 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(6-1) drop()→dropna(), total()→sum() / (6-2) 328",
+      "code": "# (6-1) 오류 정정\nprint('결측치 처리 전\\n', data_temp.isnull().sum())\ndata_na = data_temp.dropna()\nprint('\\n결측치 처리 후\\n', data_na.isnull().sum())\n\n# (6-2) 답안: 328\n# data_temp.isnull().sum().sum() == 328",
+      "explanation": "결측 행 전체 삭제는 dropna()입니다(drop()은 인덱스/컬럼 라벨을 받는 다른 메서드). 결측치 개수 집계는 isnull().sum()(컬럼별) 또는 isnull().sum().sum()(전체) — total()이라는 메서드는 존재하지 않습니다. data_temp의 결측치 총합은 328개(total_working_years, distance_from_home 등에 분포)입니다.",
+      "tip": "dropna(axis=0): 결측 행 삭제(기본), dropna(axis=1): 결측 열 삭제. fillna(): 채우기. .total()은 pandas에 없는 메서드 — 합계는 항상 .sum()."
+    },
+    {
+      "id": 7,
+      "title": "원-핫 인코딩 (get_dummies)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "범주형 데이터를 이진형 벡터로 변환하는 코드를 완성하세요.",
+        "대상 데이터프레임: data_na",
+        "원-핫 인코딩 대상: department, job_role, education_field, overtime, marital_status",
+        "결과를 data_preset에 저장하고 info()로 검증하세요",
+        "빈칸 코드: data_preset = pd.<#7-1>(data=data_na, <#7-2>=[...])",
+        "(7-1) 첫 번째 빈칸에 들어갈 함수명은?",
+        "(7-2) 두 번째 빈칸에 들어갈 옵션명은?",
+        "(7-3) data_preset의 전체 컬럼 개수는 총 몇 개인가요?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(7-1) get_dummies / (7-2) columns / (7-3) 27",
+      "code": "data_preset = pd.get_dummies(\n    data=data_na,\n    columns=['department', 'job_role', 'education_field', 'overtime', 'marital_status']\n)\ndata_preset.info()\n\n# 답안\n# (7-1) get_dummies\n# (7-2) columns\n# (7-3) 27  (원-핫 인코딩 후 전체 컬럼 개수)",
+      "explanation": "pd.get_dummies(columns=[...])로 지정 범주형 컬럼만 원-핫 인코딩합니다. 5개 범주형 컬럼이 각 범주 수만큼 더미 컬럼으로 펼쳐져, 수치형 컬럼과 합쳐 전체 27개 컬럼이 됩니다. 이번 문항은 drop_first를 지정하지 않았으므로 각 범주가 모두 더미로 생성됩니다(가이드에 명시된 대로 따를 것).",
+      "tip": "drop_first=True를 쓰면 컬럼 수가 (범주 수-1)로 줄어 다중공선성을 방지하지만, 문항이 요구하지 않으면 임의로 추가하지 마세요 — 컬럼 개수(7-3)가 달라집니다."
+    },
+    {
+      "id": 8,
+      "title": "타겟 인코딩 + 데이터 분리 + RobustScaler",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "타겟을 인코딩하고, 훈련/검증 데이터셋을 분리한 뒤 스케일링하세요.",
+        "대상 데이터프레임: data_preset",
+        "타겟 attrition을 LabelEncoder로 정수 인코딩 (No=0, Yes=1)",
+        "attrition을 레이블 y, 나머지를 피처 X로 할당",
+        "훈련:검증 = 80:20, random_state=42, stratify로 이직 비율 유지 (X_train, X_valid, y_train, y_valid)",
+        "RobustScaler를 ss 변수에 지정 → 훈련데이터로 fit_transform, 검증데이터는 transform만 적용",
+        "(8-2) 스케일링된 검증데이터의 최댓값을 반올림한 값은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LabelEncoder(No=0/Yes=1) + 80:20 stratify + RobustScaler / (8-2) 6",
+      "code": "from sklearn.preprocessing import LabelEncoder, RobustScaler\nfrom sklearn.model_selection import train_test_split\n\nle = LabelEncoder()\ndata_preset['attrition'] = le.fit_transform(data_preset['attrition'])\n\nX = data_preset.drop('attrition', axis=1)\ny = data_preset['attrition']\n\nX_train, X_valid, y_train, y_valid = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y\n)\n\nss = RobustScaler()\nX_train = ss.fit_transform(X_train)\nX_valid = ss.transform(X_valid)\nround(np.max(X_valid))\n\n# (8-2) 답안: 6  (스케일링된 검증데이터 최댓값 반올림)",
+      "explanation": "LabelEncoder는 범주 레이블을 정수로 변환합니다(알파벳 순서로 No=0, Yes=1). RobustScaler는 중앙값과 IQR로 스케일링해 이상치에 강건합니다(StandardScaler는 평균/표준편차). 검증데이터는 반드시 transform만 적용(fit 금지) — 데이터 누수 방지. 스케일링된 검증데이터 최댓값을 반올림하면 6입니다.",
+      "tip": "스케일러 3종: StandardScaler(평균0/표준편차1), MinMaxScaler(0~1), RobustScaler(중앙값/IQR, 이상치 강건). 핵심: 훈련 fit_transform, 검증/테스트 transform만."
+    },
+    {
+      "id": 9,
+      "title": "RandomForest + XGBoost 모델 생성 및 학습",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(9-1) RandomForest 모델을 rf 변수에 저장하고 훈련셋으로 학습",
+        "n_estimators=100, max_depth=5, min_samples_split=3, random_state=42",
+        "(9-2) XGBoost 모델을 xgb 변수에 저장하고 훈련셋으로 학습",
+        "n_estimators=100, max_depth=4, learning_rate=0.1, random_state=42, eval_metric='logloss'"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "RandomForestClassifier + XGBClassifier 학습 완료",
+      "code": "# (9-1) RandomForest\nfrom sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(\n    n_estimators=100,\n    max_depth=5,\n    min_samples_split=3,\n    random_state=42\n)\nrf.fit(X_train, y_train)\n\n# (9-2) XGBoost\nfrom xgboost import XGBClassifier\nxgb = XGBClassifier(\n    n_estimators=100,\n    max_depth=4,\n    learning_rate=0.1,\n    random_state=42,\n    eval_metric='logloss'\n)\nxgb.fit(X_train, y_train)",
+      "explanation": "RandomForest는 여러 결정트리의 배깅(bagging) 앙상블, XGBoost는 부스팅(boosting) 앙상블(이전 트리의 오차를 다음 트리가 보정). XGBoost 주요 하이퍼파라미터: n_estimators(트리 수), max_depth(깊이), learning_rate(학습률, 작을수록 신중), eval_metric='logloss'(이진분류 손실). 분류는 XGBClassifier, 회귀는 XGBRegressor.",
+      "tip": "XGBoost는 xgboost 패키지에서 import(from xgboost import XGBClassifier). Colab에는 기본 설치되어 있습니다. eval_metric='logloss'로 경고 없이 이진분류 학습."
+    },
+    {
+      "id": 10,
+      "title": "모델 평가 오류 정정 (Accuracy)",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "(10-1) 아래 코드는 에러가 나고 있습니다. 코드의 오류를 정정하세요.",
+        "성능 평가는 검증데이터셋을 활용",
+        "RandomForest 예측을 y_pred_rf, XGBoost 예측을 y_pred_xgb에 저장",
+        "각 모델의 Accuracy를 rf_acc, xgb_acc에 저장하고 출력",
+        "오류 코드: from sklearn.metrics import accuracy → accuracy_score 로 수정",
+        "rf.pred(...) / xgb.pred(...) → predict(...) 로 수정",
+        "(10-2) 두 모델의 Accuracy를 비교했을 때 더 우수한 모델은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(10-1) accuracy→accuracy_score, pred→predict / (10-2) RandomForest (0.843 > 0.832)",
+      "code": "# (10-1) 오류 정정\nfrom sklearn.metrics import accuracy_score\n\ny_pred_rf = rf.predict(X_valid)\ny_pred_xgb = xgb.predict(X_valid)\n\nrf_acc = accuracy_score(y_valid, y_pred_rf)\nxgb_acc = accuracy_score(y_valid, y_pred_xgb)\nprint(rf_acc, xgb_acc)\n\n# (10-2) 답안: RandomForest (rf 0.843 vs xgb 0.832)",
+      "explanation": "정확도 함수는 sklearn.metrics.accuracy_score (accuracy가 아님). 예측 메서드는 model.predict() (pred가 아님). 검증 결과 RandomForest Accuracy ≈ 0.843, XGBoost ≈ 0.832로 RandomForest가 근소하게 우수합니다. 데이터/시드에 따라 소폭 달라질 수 있으나 본 설정에서는 RF가 더 높습니다.",
+      "tip": "자주 나오는 오답: accuracy_score를 accuracy로, predict를 pred로 줄여 씀. 클래스 불균형이 크면 Accuracy만으로 판단하지 말고 F1·Recall도 함께 확인."
+    },
+    {
+      "id": 11,
+      "title": "XGBoost 혼동행렬 시각화",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "XGBoost 모델의 예측 결과를 혼동행렬(Confusion Matrix)로 분석하세요.",
+        "검증데이터 예측 결과(y_pred_xgb)로 confusion_matrix를 계산",
+        "seaborn heatmap으로 시각화",
+        "각 칸에 정수 빈도 표시 (annot=True, fmt='d')"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "confusion_matrix + heatmap (annot=True, fmt='d')",
+      "code": "from sklearn.metrics import confusion_matrix\n\ncm = confusion_matrix(y_valid, y_pred_xgb)\nsns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)\nplt.xlabel('Predicted label')\nplt.ylabel('True label')\nplt.title('Confusion Matrix')\nplt.show()",
+      "explanation": "confusion_matrix(정답, 예측)은 [[TN, FP], [FN, TP]] 형태의 2x2 행렬을 반환합니다(이진분류). heatmap 옵션: annot=True(셀에 값 표시, 필수), fmt='d'(정수 포맷 — 미지정 시 지수표기), cmap='Blues'(색상), cbar=False(컬러바 숨김). 대각선(TN, TP)이 정답, 비대각선(FP, FN)이 오답입니다.",
+      "tip": "fmt='d'를 빼면 1.2e+02 같은 지수 표기로 나옵니다. 라벨(xlabel='Predicted', ylabel='True')을 붙여 가독성을 높이세요."
+    },
+    {
+      "id": 12,
+      "title": "딥러닝 분류 모델 (softmax 2노드 + to_categorical)",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential, load_model\nfrom tensorflow.keras.layers import Dense, Dropout\nfrom tensorflow.keras.callbacks import EarlyStopping\nfrom tensorflow.keras.utils import to_categorical\ntf.random.set_seed(1)",
+      "problem": [
+        "아래 토폴로지와 가이드를 참고해 딥러닝 모델을 구성·학습하세요.",
+        "먼저 to_categorical로 타겟을 원-핫 벡터로 변환 (실행 필수)",
+        "모델 토폴로지: 입력층 → Dense(128, relu) → Dropout(0.3) → Dense(64, relu) → Dense(32, relu) → Dense(2, softmax)",
+        "히든 activation='relu', 출력층 activation='softmax' (2노드)",
+        "EarlyStopping: monitor='val_loss', patience=5, restore_best_weights=True → estop 변수에 저장",
+        "compile: optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']",
+        "fit: batch_size=32, epochs=50, validation_data, callbacks=[estop] → history에 저장"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(128→Dropout→64→32→softmax2) + categorical_crossentropy + EarlyStopping(patience=5)",
+      "code": "# 타겟 원-핫 변환 (실행 필수)\ny_train = to_categorical(y_train, num_classes=2)\ny_valid = to_categorical(y_valid, num_classes=2)\n\nmodel = Sequential([\n    Dense(128, activation='relu', input_dim=X_train.shape[1]),\n    Dropout(0.3),\n    Dense(64, activation='relu'),\n    Dense(32, activation='relu'),\n    Dense(2, activation='softmax')\n])\nestop = EarlyStopping(\n    monitor='val_loss',\n    patience=5,\n    restore_best_weights=True\n)\nmodel.compile(\n    optimizer='adam',\n    loss='categorical_crossentropy',\n    metrics=['accuracy']\n)\nhistory = model.fit(\n    X_train, y_train,\n    validation_data=(X_valid, y_valid),\n    batch_size=32,\n    epochs=50,\n    callbacks=[estop]\n)",
+      "explanation": "이진분류를 softmax(2노드)로 푸는 방식입니다. 출력층 Dense(2, softmax) + 타겟 to_categorical 원-핫 + loss='categorical_crossentropy' 세트가 일관되어야 합니다(1회의 Dense(1, sigmoid)+binary_crossentropy와 대비). EarlyStopping(patience=5)은 val_loss가 5 epoch 동안 개선 안 되면 중단하고 restore_best_weights로 최적 가중치를 복원합니다.",
+      "tip": "두 가지 이진분류 구성: ① Dense(1, sigmoid)+binary_crossentropy(정수 타겟), ② Dense(2, softmax)+categorical_crossentropy(원-핫 타겟). 섞으면 차원 오류. epochs/callbacks(s 필수)."
+    },
+    {
+      "id": 13,
+      "title": "학습/검증 Accuracy 시각화",
+      "category": "AI 모델링",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "matplotlib로 학습/검증 Accuracy의 변화를 그래프로 시각화하세요.",
+        "1개 그래프에 학습 Accuracy와 검증 Accuracy 모두 표시",
+        "범례: 'acc', 'val_acc' / 타이틀: 'Model Accuracy' / X축: 'Epoch', Y축: 'Accuracy'",
+        "빈칸 코드: plt.plot(<#13-1>['accuracy']) ... plt.<#13-2>(['acc', 'val_acc'])",
+        "(13-1) 첫 번째 빈칸에 들어갈 객체는?",
+        "(13-2) 두 번째 빈칸에 들어갈 함수명은?"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "(13-1) history.history / (13-2) legend",
+      "code": "plt.plot(history.history['accuracy'])\nplt.plot(history.history['val_accuracy'])\nplt.title('Model Accuracy')\nplt.xlabel('Epoch')\nplt.ylabel('Accuracy')\nplt.legend(['acc', 'val_acc'])\nplt.show()\n\n# 답안\n# (13-1) history.history\n# (13-2) legend",
+      "explanation": "fit()이 반환한 history 객체의 history.history 딕셔너리에 epoch별 지표가 저장됩니다. metrics=['accuracy']로 컴파일했으므로 키는 'accuracy'(훈련)와 'val_accuracy'(검증). plt.legend([...])로 두 곡선의 범례를 답니다. 1회는 Loss 곡선을, 2회는 Accuracy 곡선을 그리는 차이만 있습니다.",
+      "tip": "history.history.keys() = ['loss', 'accuracy', 'val_loss', 'val_accuracy']. metrics=['accuracy']면 키는 'accuracy', metrics=['mse']면 'mse'. 범례 함수는 plt.legend()."
+    },
+    {
+      "id": 14,
+      "title": "모델 저장/로드 후 신규 입사자 이직 예측",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "학습한 딥러닝 모델을 저장한 뒤 load_model()로 불러와 신규 입사자의 이직 여부를 예측하세요.",
+        "주어진 new_raw(신규 입사자 2명)는 그대로 사용",
+        "model을 'attrition_model.keras'로 저장 → load_model()로 불러오기",
+        "new_raw를 학습 때와 동일하게 전처리: 원-핫 인코딩 후 학습 피처 컬럼(X.columns)에 맞춰 정렬 → ss로 스케일링",
+        "불러온 모델로 예측한 확률에서 더 높은 클래스를 선택 → 'Y'(이직)/'N'(잔류)으로 출력"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "예측 결과 ['Y', 'N'] (1번 미혼·초과근무·저만족 → 이직 / 2번 관리자·고소득 → 잔류)",
+      "code": "new_raw = pd.DataFrame([\n    {'age':27, 'department':'Sales', 'job_role':'Representative', 'education_field':'Marketing',\n     'monthly_income':3300, 'total_working_years':2, 'years_at_company':1, 'overtime':'Yes',\n     'job_satisfaction':1, 'work_life_balance':2, 'distance_from_home':22, 'marital_status':'Single'},\n    {'age':46, 'department':'R&D', 'job_role':'Manager', 'education_field':'Life Sciences',\n     'monthly_income':13000, 'total_working_years':22, 'years_at_company':14, 'overtime':'No',\n     'job_satisfaction':4, 'work_life_balance':4, 'distance_from_home':4, 'marital_status':'Married'},\n])\n\nmodel.save('attrition_model.keras')\nloaded_model = load_model('attrition_model.keras')\n\nnew_enc = pd.get_dummies(new_raw)\nnew_enc = new_enc.reindex(columns=X.columns, fill_value=0)  # 학습 피처와 컬럼 정렬\nnew_scaled = ss.transform(new_enc)\n\nproba = loaded_model.predict(new_scaled)\npred = proba.argmax(axis=1)               # 0=No(잔류), 1=Yes(이직)\nresult = ['Y' if p == 1 else 'N' for p in pred]\nprint(result)\n\n# 예상 출력: ['Y', 'N']",
+      "explanation": "신규 데이터 예측의 핵심은 '학습 때와 똑같은 전처리'입니다. (1) get_dummies로 원-핫 인코딩하되, 신규 데이터엔 없는 범주가 있으므로 reindex(columns=X.columns, fill_value=0)로 학습 피처 컬럼 순서·구성에 정확히 맞춥니다. (2) 학습된 ss로 transform만(fit 금지). (3) softmax 출력이므로 argmax(axis=1)로 더 높은 확률의 클래스를 선택. 1번(미혼·초과근무·저만족·저소득)은 이직(Y), 2번(관리자·고소득·만족)은 잔류(N)로 예측됩니다.",
+      "tip": "reindex(columns=X.columns, fill_value=0)가 가장 중요 — 신규 데이터의 더미 컬럼이 학습과 다르면 차원/순서 불일치로 엉뚱한 예측이 나옵니다. .keras 확장자는 최신 Keras 저장 포맷. softmax→argmax, sigmoid→0.5 임계값."
+    }
+  ]
+}

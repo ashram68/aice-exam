@@ -1,0 +1,271 @@
+{
+  "examId": "exam-06",
+  "title": "AICE Associate 모의고사 6회 — 통신사 고객 이탈 예측",
+  "subtitle": "이진 분류 (Binary Classification) · 100점 · 14문항",
+  "dataset": "telco_customer.csv",
+  "domain": "통신사 고객관리 (Telco Customer Churn)",
+  "targetVariable": "churn (No=0, Yes=1)",
+  "totalPoints": 100,
+  "sections": [
+    {"name": "데이터 분석", "points": 20, "range": "Q1~Q5"},
+    {"name": "데이터 전처리", "points": 30, "range": "Q6~Q9"},
+    {"name": "AI 모델링", "points": 50, "range": "Q10~Q14"}
+  ],
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import LabelEncoder, MaxAbsScaler\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\n# 데이터 로드\ndf = pd.read_csv('./telco_customer.csv')",
+  "questions": [
+    {
+      "id": 1,
+      "title": "라이브러리 import (빈칸 채우기)",
+      "category": "데이터 분석",
+      "points": 4,
+      "type": "code",
+      "problem": [
+        "이번 분석에 필요한 라이브러리를 import하려 합니다. 빈칸을 알맞게 채우세요.",
+        "from sklearn.impute import ____  (결측치 대치)",
+        "from sklearn.preprocessing import LabelEncoder, ____  (인코딩, 스케일링)",
+        "from sklearn.tree import ____  (의사결정나무)",
+        "from sklearn.ensemble import ____  (랜덤포레스트)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "SimpleImputer / MaxAbsScaler / DecisionTreeClassifier / RandomForestClassifier",
+      "code": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import LabelEncoder, MaxAbsScaler\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier",
+      "explanation": "이번 회차의 핵심 도구는 결측치 대치(SimpleImputer), 라벨 인코딩(LabelEncoder), MaxAbsScaler 스케일링, 의사결정나무(DecisionTreeClassifier)·랜덤포레스트(RandomForestClassifier) 분류기입니다. 각 모듈의 정확한 import 경로를 기억하세요.",
+      "tip": "주요 import 경로: 결측치 대치 sklearn.impute.SimpleImputer, 스케일러 sklearn.preprocessing, 분류기 sklearn.tree(DecisionTree)·sklearn.ensemble(RandomForest)."
+    },
+    {
+      "id": 2,
+      "title": "데이터 구조 파악 (info)",
+      "category": "데이터 분석",
+      "points": 4,
+      "type": "code",
+      "problem": [
+        "전체 행·열 개수, 각 컬럼의 자료형과 결측치(non-null) 현황을 한 번에 확인하는 코드를 작성하세요.",
+        "빈칸 코드: df.____()"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df.info()",
+      "code": "df.info()\n# 전체 5000행 14열. age만 4800 non-null (결측 200개). object 7개 / 수치형 7개.",
+      "explanation": "df.info()는 행·열 개수, 각 컬럼의 non-null 개수와 dtype을 한 번에 보여줍니다. 전체 5,000행 14열이며 age 컬럼만 4,800개로 200개 결측치가 있고, 범주형(object) 7개·수치형 7개로 구성됩니다.",
+      "tip": "df.info()(구조·결측·dtype), df.describe()(수치 통계), df.shape((행,열)), df.head()(앞 행). 결측 파악은 df.isnull().sum()도 사용."
+    },
+    {
+      "id": 3,
+      "title": "수치형 기술통계 (describe)",
+      "category": "데이터 분석",
+      "points": 4,
+      "type": "code",
+      "problem": [
+        "수치형 변수들의 기초 통계량(평균·표준편차·사분위수 등)을 한 번에 확인하는 코드를 작성하세요.",
+        "빈칸 코드: df.____()"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "df.describe()",
+      "code": "df.describe()\n# monthly_charge 평균 71.4·최대 130, tenure 0~72개월, satisfaction 1~5",
+      "explanation": "df.describe()는 수치형 컬럼의 count·mean·std·min·25%·50%·75%·max를 표로 반환합니다. 월 요금(monthly_charge)은 평균 71.4·최대 130으로 편차가 크고, 가입 유지 개월(tenure)은 0~72로 신규·장기 고객이 혼재합니다.",
+      "tip": "describe()는 기본적으로 수치형만. 범주형 통계는 df.describe(include='object'). 평균/표준편차/사분위수를 한눈에 파악."
+    },
+    {
+      "id": 4,
+      "title": "월 요금 분포 histplot (hue=churn)",
+      "category": "데이터 분석",
+      "points": 4,
+      "type": "code",
+      "problem": [
+        "seaborn의 histplot으로 월 요금(monthly_charge) 분포를 이탈여부(churn)별로 구분(hue)하여 시각화하세요.",
+        "구간 수 bins=30, 밀도곡선 kde=True로 설정",
+        "빈칸 코드: sns.____(data=df, x='monthly_charge', hue='churn', bins=30, kde=True)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.histplot(data=df, x='monthly_charge', hue='churn', bins=30, kde=True)",
+      "code": "plt.figure(figsize=(8,5))\nsns.histplot(data=df, x='monthly_charge', hue='churn', bins=30, kde=True)\nplt.title('월 요금 분포 (이탈여부별)')\nplt.show()\n# 이탈 고객 평균 월 요금(81.65) > 잔류(68.95) — 고요금 구간 이탈 비중 높음",
+      "explanation": "histplot은 히스토그램(구간별 빈도)을 그리며, bins로 구간 수, kde=True로 밀도곡선을 추가, hue로 범주별 색을 구분합니다. 이탈 고객의 평균 월 요금(81.65)이 잔류(68.95)보다 높아, 요금 부담이 이탈의 주요 요인일 가능성을 시사합니다.",
+      "tip": "histplot(분포 빈도), kdeplot(밀도만), displot(Figure 단위). bins로 구간 조절, kde=True로 곡선 추가, hue로 그룹 구분."
+    },
+    {
+      "id": 5,
+      "title": "계약유형별 이탈률 barplot",
+      "category": "데이터 분석",
+      "points": 4,
+      "type": "code",
+      "problem": [
+        "계약 형태(contract)별 평균 이탈률을 seaborn의 barplot으로 시각화하세요.",
+        "먼저 churn을 0/1 수치로 변환한 임시 컬럼 churn_flag를 만들고 y축으로 사용",
+        "빈칸 코드: sns.____(data=df, x='contract', y='churn_flag')"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "sns.barplot(data=df, x='contract', y='churn_flag')",
+      "code": "df['churn_flag'] = (df['churn'] == 'Yes').astype(int)\nplt.figure(figsize=(7,5))\nsns.barplot(data=df, x='contract', y='churn_flag')\nplt.title('계약유형별 이탈률')\nplt.ylabel('이탈률')\nplt.show()\ndf.drop(columns=['churn_flag'], inplace=True)\n# 월단위 31.1% >> 1년 6.0% > 2년 4.6%",
+      "explanation": "barplot은 기본적으로 각 범주의 y값 평균(과 신뢰구간)을 막대로 표시합니다. churn을 0/1 플래그로 만들면 평균이 곧 이탈률이 됩니다. 월 단위 계약(Month-to-month)의 이탈률이 31.1%로 1년(6.0%)·2년(4.6%)보다 압도적으로 높아, 장기 계약 전환이 이탈 방어의 핵심임을 보여줍니다.",
+      "tip": "barplot은 y의 '평균'을 막대로(countplot은 '개수'). 0/1 플래그의 평균 = 비율. 시각화 후 임시 컬럼은 drop으로 정리."
+    },
+    {
+      "id": 6,
+      "title": "결측치 대치 — SimpleImputer(평균)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "age 컬럼의 결측치 200개를 SimpleImputer의 평균(mean) 전략으로 대치하세요.",
+        "대치 후 결측치 개수를 출력하여 0임을 확인",
+        "빈칸 코드: imputer = SimpleImputer(strategy='____') / df['age'] = imputer.____(df[['age']])"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "SimpleImputer(strategy='mean') + fit_transform(df[['age']])",
+      "code": "imputer = SimpleImputer(strategy='mean')\ndf['age'] = imputer.fit_transform(df[['age']])\nprint(df['age'].isnull().sum())   # 0\n\n# 답안\n# strategy='mean' / 메서드 fit_transform",
+      "explanation": "SimpleImputer(strategy='mean')는 결측치를 컬럼 평균으로 대치합니다(strategy: 'mean','median','most_frequent','constant'). SimpleImputer는 2차원 입력을 요구하므로 df[['age']](대괄호 2개)로 전달합니다. fit_transform으로 학습+변환을 동시에 수행하며, 대치 후 결측치는 0이 됩니다.",
+      "tip": "SimpleImputer는 2D 입력 필요 → df[['age']]. strategy 4종: mean/median(수치), most_frequent(범주), constant(고정값). fillna()로도 같은 처리 가능."
+    },
+    {
+      "id": 7,
+      "title": "식별자 제거 · 타깃 인코딩 (map)",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "예측에 불필요한 식별자 customer_id를 제거하고, 타깃 churn을 No→0, Yes→1로 변환하세요.",
+        "빈칸 코드: df = df.drop(columns=['____']) / df['churn'] = df['churn'].map({'No': ____, 'Yes': ____})"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "drop(columns=['customer_id']) + map({'No': 0, 'Yes': 1})",
+      "code": "df = df.drop(columns=['customer_id'])\ndf['churn'] = df['churn'].map({'No': 0, 'Yes': 1})\nprint(df['churn'].value_counts())\n# 0(잔류) 4040 / 1(이탈) 960 — 이탈 비율 약 19.2% (불균형)",
+      "explanation": "식별자 customer_id는 예측에 무의미하므로 drop합니다. 타깃 churn은 map({'No':0,'Yes':1})으로 직접 정수 매핑합니다(LabelEncoder 대신 명시적 매핑). 결과: 잔류(0) 4,040명, 이탈(1) 960명으로 이탈 비율이 약 19.2%인 불균형 데이터입니다.",
+      "tip": "map(딕셔너리)은 값을 명시적으로 치환 — 매핑 방향(No=0,Yes=1)을 직접 지정해 LabelEncoder의 알파벳순 모호함을 피함. 불균형이므로 평가 시 F1·정밀도·재현율도 함께 확인."
+    },
+    {
+      "id": 8,
+      "title": "범주형 인코딩 — LabelEncoder (반복문)",
+      "category": "데이터 전처리",
+      "points": 8,
+      "type": "code",
+      "problem": [
+        "범주형 변수 gender, partner, contract, internet_service, payment_method를 LabelEncoder로 정수 인코딩하세요.",
+        "반복문을 사용해 컬럼별로 변환",
+        "빈칸 코드: le = ____() / for col in cat_cols: df[col] = le.____(df[col])"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "LabelEncoder() + le.fit_transform(df[col]) (반복문)",
+      "code": "le = LabelEncoder()\ncat_cols = ['gender', 'partner', 'contract', 'internet_service', 'payment_method']\nfor col in cat_cols:\n    df[col] = le.fit_transform(df[col])\n\n# 답안\n# le = LabelEncoder() / 메서드 fit_transform",
+      "explanation": "LabelEncoder는 범주를 알파벳 순으로 0,1,2…에 매핑합니다(예: contract → Month-to-month=0, One year=1, Two year=2). 반복문으로 각 컬럼에 fit_transform을 적용해 모든 범주형을 수치형으로 바꿔 모델 입력이 가능해집니다. (원-핫 인코딩 get_dummies와 달리 컬럼 수가 늘지 않음)",
+      "tip": "LabelEncoder는 단일 컬럼(1D)용 — 반복문으로 컬럼별 처리. 순서가 의미 없는 명목형에 라벨 인코딩을 쓰면 트리 모델엔 무난하나 선형/딥러닝엔 원-핫이 더 적절."
+    },
+    {
+      "id": 9,
+      "title": "피처/타깃 분리 · 분할 · MaxAbsScaler",
+      "category": "데이터 전처리",
+      "points": 7,
+      "type": "code",
+      "problem": [
+        "churn을 타깃 y, 나머지를 피처 X로 분리하고, train_test_split으로 학습:평가 = 8:2 분할하세요.",
+        "random_state=42, stratify=y",
+        "MaxAbsScaler로 스케일링 (학습데이터에 fit, 학습/평가에 transform)",
+        "빈칸 코드: X = df.drop(columns=['____']) / stratify=____ / scaler = ____() / X_test = scaler.____(X_test)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "drop(columns=['churn']) / stratify=y / MaxAbsScaler() / transform",
+      "code": "X = df.drop(columns=['churn'])\ny = df['churn']\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42, stratify=y\n)\nscaler = MaxAbsScaler()\nX_train = scaler.fit_transform(X_train)\nX_test = scaler.transform(X_test)\nprint(X_train.shape, X_test.shape)   # (4000, 12) (1000, 12)",
+      "explanation": "타깃(churn)을 분리하고 stratify=y로 이탈 비율(19.2%)을 학습/평가에 동일하게 유지합니다. MaxAbsScaler는 각 특성을 절댓값 최댓값으로 나눠 [-1,1] 범위로 변환하며 0을 보존해 희소·양수 데이터에 적합합니다. 학습데이터로 fit_transform, 평가데이터는 transform만 적용합니다. 최종 피처는 12개입니다.",
+      "tip": "스케일러 종류: Standard(평균0/표준편차1), MinMax(0~1), MaxAbs([-1,1], 0 보존), Robust(중앙값/IQR). 검증/평가는 항상 transform만(fit 금지)."
+    },
+    {
+      "id": 10,
+      "title": "의사결정나무 학습·예측",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "DecisionTreeClassifier(random_state=42)로 학습데이터를 학습한 뒤, 평가데이터 예측값을 dt_pred에 저장하세요.",
+        "빈칸 코드: dt = DecisionTreeClassifier(random_state=____) / dt.____(X_train, y_train) / dt_pred = dt.____(X_test)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "DecisionTreeClassifier(random_state=42) + fit + predict → dt_pred",
+      "code": "dt = DecisionTreeClassifier(random_state=42)\ndt.fit(X_train, y_train)\ndt_pred = dt.predict(X_test)\n\n# 답안\n# random_state=42 / fit / predict",
+      "explanation": "DecisionTreeClassifier는 단일 결정트리로 학습(fit)하고 예측(predict)합니다. random_state=42로 재현성을 확보합니다. 의사결정나무는 빠르고 해석이 쉽지만 과적합 경향이 있어 단독 성능은 제한적입니다(다음 문항의 랜덤포레스트와 비교).",
+      "tip": "기본 학습 흐름: 모델 생성 → fit(X_train, y_train) → predict(X_test). DecisionTree는 max_depth 미지정 시 완전 성장(과적합 위험)."
+    },
+    {
+      "id": 11,
+      "title": "랜덤포레스트 학습·예측",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "RandomForestClassifier(n_estimators=100, random_state=42)로 학습한 뒤, 평가데이터 예측값을 rf_pred에 저장하세요.",
+        "빈칸 코드: rf = RandomForestClassifier(n_estimators=____, random_state=42) / rf.____(X_train, y_train) / rf_pred = rf.____(X_test)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "RandomForestClassifier(n_estimators=100, random_state=42) + fit + predict → rf_pred",
+      "code": "rf = RandomForestClassifier(n_estimators=100, random_state=42)\nrf.fit(X_train, y_train)\nrf_pred = rf.predict(X_test)\n\n# 답안\n# n_estimators=100 / fit / predict",
+      "explanation": "RandomForestClassifier는 100개(n_estimators)의 결정트리를 배깅 앙상블해 단일 트리의 과적합을 완화하고 일반화 성능을 높입니다. 학습(fit)·예측(predict) 흐름은 동일합니다. 다음 문항에서 두 모델의 성능을 비교합니다.",
+      "tip": "n_estimators(트리 수)가 클수록 안정적이나 학습이 느려짐. RandomForest는 보통 단일 DecisionTree보다 일반화 성능이 우수."
+    },
+    {
+      "id": 12,
+      "title": "모델 평가 및 최적 모델 선택",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "두 모델(dt_pred, rf_pred)에 대해 정확도, F1-score, 정밀도, 재현율을 계산해 출력하고, 어떤 모델이 더 우수한지 판단하세요.",
+        "(평가 코드를 직접 작성)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "RandomForest 우수 (Acc 0.842·F1 0.477 > DT Acc 0.756·F1 0.396)",
+      "code": "from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score\n\nfor name, pred in [('의사결정나무', dt_pred), ('랜덤포레스트', rf_pred)]:\n    print(name)\n    print('  정확도 :', round(accuracy_score(y_test, pred), 4))\n    print('  F1     :', round(f1_score(y_test, pred), 4))\n    print('  정밀도 :', round(precision_score(y_test, pred), 4))\n    print('  재현율 :', round(recall_score(y_test, pred), 4))\n\n# 결과:\n# 의사결정나무  정확도 0.756 / F1 0.396 / 정밀도 0.3774 / 재현율 0.4167\n# 랜덤포레스트  정확도 0.842 / F1 0.4768 / 정밀도 0.6545 / 재현율 0.375\n# → 최적 모델: 랜덤포레스트 (정확도·F1 모두 우수)",
+      "explanation": "네 가지 분류 지표: accuracy(전체 정답률), precision(이탈 예측 중 실제 이탈 비율), recall(실제 이탈 중 맞춘 비율), f1(precision·recall 조화평균). 랜덤포레스트가 정확도(0.842)·F1(0.477) 모두에서 의사결정나무를 앞서 최적 모델입니다. 정밀도(0.65)는 높지만 재현율(0.375)이 낮아 실제 이탈자 일부를 놓치므로, 필요 시 임계값을 낮춰 재현율을 끌어올리는 조정을 검토할 수 있습니다.",
+      "tip": "불균형 데이터는 정확도만으로 판단 금물 — F1/정밀도/재현율 병행. 비즈니스 목적(이탈자 최대 포착 vs 캠페인 비용 절감)에 따라 정밀도/재현율 트레이드오프 조정."
+    },
+    {
+      "id": 13,
+      "title": "딥러닝 모델 구축 — BatchNormalization 포함",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Dense, BatchNormalization, Input\ntf.random.set_seed(42)",
+      "problem": [
+        "모델 구조도를 참고하여 Keras Sequential 딥러닝 모델을 직접 작성하고 컴파일·학습하세요.",
+        "각 은닉층(Dense) 뒤에 BatchNormalization을 배치",
+        "입력은 12개 특성, 출력은 이진분류용 sigmoid 1뉴런",
+        "모델 구조: Input(12) → Dense(64, relu) → BatchNormalization → Dense(32, relu) → BatchNormalization → Dense(1, sigmoid)",
+        "compile: optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']",
+        "fit: epochs=30, batch_size=32"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "Sequential(Input(12)→Dense64→BN→Dense32→BN→Dense1 sigmoid) + adam/binary_crossentropy, epochs=30",
+      "code": "model = Sequential([\n    Input(shape=(X_train.shape[1],)),\n    Dense(64, activation='relu'),\n    BatchNormalization(),\n    Dense(32, activation='relu'),\n    BatchNormalization(),\n    Dense(1, activation='sigmoid')\n])\nmodel.compile(\n    optimizer='adam',\n    loss='binary_crossentropy',\n    metrics=['accuracy']\n)\nmodel.fit(X_train, y_train, epochs=30, batch_size=32, verbose=1)\n# 테스트 정확도 약 0.82 수준",
+      "explanation": "BatchNormalization은 각 은닉층 출력 분포를 미니배치 단위로 정규화해 학습을 안정화하고 수렴을 가속합니다(내부 공변량 변화 완화). 은닉층(Dense) 뒤마다 BatchNormalization()을 배치합니다. 이진분류이므로 출력층은 sigmoid 1뉴런, 손실은 binary_crossentropy입니다. Input(shape=(12,))로 12개 특성 입력을 명시합니다.",
+      "tip": "BatchNormalization은 보통 Dense 다음(활성화 전후 논쟁 있으나 본 문항은 Dense 뒤 배치). 이진분류 출력은 Dense(1, sigmoid)+binary_crossentropy. Input(shape=(특성수,))로 입력 차원 지정."
+    },
+    {
+      "id": 14,
+      "title": "신규 고객 이탈 예측",
+      "category": "AI 모델링",
+      "points": 10,
+      "type": "code",
+      "problem": [
+        "신규 고객 1명의 정보(인코딩된 NumPy 배열, 컬럼 순서는 X와 동일)가 주어집니다.",
+        "Q9에서 학습한 scaler로 동일하게 변환한 뒤, Q13의 딥러닝 모델로 이탈 확률을 예측하고 0.5 기준으로 이탈/잔류 판정",
+        "new_customer = np.array([[1, 0, 0, 30, 2, 0, 1, 2, 3, 4, 1, 95.0]])",
+        "빈칸 코드: new_scaled = scaler.____(new_customer) / prob = model.____(new_scaled)"
+      ],
+      "choices": null,
+      "answer": null,
+      "answerDisplay": "scaler.transform + model.predict → 이탈 확률 ≈ 0.9989, 판정: 이탈",
+      "code": "new_customer = np.array([[1, 0, 0, 30, 2, 0, 1, 2, 3, 4, 1, 95.0]])\nnew_scaled = scaler.transform(new_customer)\nprob = model.predict(new_scaled)\nprint('이탈 확률:', round(float(prob[0][0]), 4))\nprint('판정:', '이탈' if prob[0][0] >= 0.5 else '잔류')\n\n# 예상 출력: 이탈 확률 ≈ 0.9989, 판정: 이탈",
+      "explanation": "신규 데이터는 학습 때와 동일한 scaler로 transform만 적용합니다(fit 금지). 이미 인코딩된 배열이므로 컬럼 순서만 X와 같으면 됩니다. sigmoid 출력 확률을 0.5 기준으로 이탈/잔류 판정합니다. 이 고객은 월 단위 계약(contract=0)·만족도 1점·문의 4회·높은 월 요금(95.0)의 전형적 고위험 프로파일로, 모델은 이탈 확률 약 0.99로 '이탈'을 예측합니다 → 즉시 리텐션 캠페인 대상.",
+      "tip": "신규 예측은 학습된 scaler로 transform만. sigmoid 확률 ≥ 0.5 → 이탈(1). 딥러닝은 환경/초기값에 따라 확률 소수점이 달라질 수 있으나 판정(이탈)은 동일."
+    }
+  ]
+}
