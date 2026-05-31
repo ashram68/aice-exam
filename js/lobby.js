@@ -44,7 +44,7 @@
             <p class="lobby-card-desc">${(exam.description || '').replace(/\n/g, '<br>')}</p>
             <div class="lobby-card-buttons">
               <button class="lobby-btn lobby-btn-colab" disabled>Google Colab 실습</button>
-              <button class="lobby-btn lobby-btn-outline" disabled>정답 및 해설 보기</button>
+              <button class="lobby-btn lobby-btn-gray" disabled>정답 및 해설 보기</button>
               <button class="lobby-btn lobby-btn-outline" disabled>해설 강의 수강</button>
             </div>
           </div>
@@ -57,7 +57,7 @@
           <p class="lobby-card-desc">${(exam.description || '').replace(/\n/g, '<br>')}</p>
           <div class="lobby-card-buttons">
             <a href="${exam.colabUrl}" target="_blank" rel="noopener" class="lobby-btn lobby-btn-colab" onclick="event.preventDefault(); if(window.openColabWithNotice){openColabWithNotice(this.href);}else{window.open(this.href,'_blank','noopener');}">Google Colab 실습</a>
-            <button class="lobby-btn lobby-btn-outline" onclick="location.href='viewer.html?exam=${exam.id}'">정답 및 해설 보기</button>
+            <button class="lobby-btn lobby-btn-gray" onclick="location.href='viewer.html?exam=${exam.id}'">정답 및 해설 보기</button>
             <button class="lobby-btn lobby-btn-outline" onclick="window.open('${exam.lectureUrl}','_blank')">해설 강의 수강</button>
           </div>
         </div>
