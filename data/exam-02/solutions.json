@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q5~Q8"},
     {"name": "AI 모델링", "points": 50, "range": "Q9~Q14"}
   ],
-  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./hr_attrition_clf.csv')",
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('hr_attrition_clf.csv')",
   "questions": [
     {
       "id": 1,
@@ -42,8 +42,8 @@
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df = pd.read_csv('./hr_attrition_clf.csv'); df.head(4)",
-      "code": "df = pd.read_csv('./hr_attrition_clf.csv')\ndf.head(4)",
+      "answerDisplay": "df = pd.read_csv('hr_attrition_clf.csv'); df.head(4)",
+      "code": "df = pd.read_csv('hr_attrition_clf.csv')\ndf.head(4)",
       "explanation": "pd.read_csv()로 CSV를 읽습니다. 1회는 head(5)였지만 2회는 첫 4개 행(head(4))을 요구합니다 — 문항이 지정한 행 수를 정확히 따르세요. df.head(n): 첫 n개 행, df.tail(n): 마지막 n개 행, df.shape: (행, 열) 크기.",
       "tip": "자주 나오는 오답: head() (괄호 안 4 누락 → 기본 5행), 따옴표 누락, pd. 누락."
     },

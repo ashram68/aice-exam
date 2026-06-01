@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q5~Q8"},
     {"name": "AI 모델링", "points": 50, "range": "Q9~Q14"}
   ],
-  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('./customer_tier_mc.csv')",
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 데이터 로드\ndf = pd.read_csv('customer_tier_mc.csv')",
   "questions": [
     {
       "id": 1,
@@ -42,8 +42,8 @@
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df = pd.read_csv('./customer_tier_mc.csv'); df.head(4)",
-      "code": "df = pd.read_csv('./customer_tier_mc.csv')\ndf.head(4)",
+      "answerDisplay": "df = pd.read_csv('customer_tier_mc.csv'); df.head(4)",
+      "code": "df = pd.read_csv('customer_tier_mc.csv')\ndf.head(4)",
       "explanation": "pd.read_csv()로 CSV를 읽고 df에 할당, head(4)로 첫 4개 행을 확인합니다. 타겟 membership_tier는 Bronze/Silver/Gold 3개 클래스의 다중분류 문제입니다.",
       "tip": "head() 괄호 안 숫자 미지정 시 기본 5행. 문항이 4개 행을 요구하면 head(4)."
     },

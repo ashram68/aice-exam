@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q5~Q9"},
     {"name": "AI 모델링", "points": 40, "range": "Q10~Q15"}
   ],
-  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('./titanic.csv')",
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('titanic.csv')",
   "questions": [
     {
       "id": 1,
@@ -43,9 +43,9 @@
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "df = pd.read_csv('./titanic.csv'); df.head(5)",
-      "code": "df = pd.read_csv('./titanic.csv')\ndf.head(5)",
-      "explanation": "pd.read_csv()로 CSV 파일을 읽습니다. './파일명'은 현재 디렉토리(생략 가능: 'titanic.csv'). df.head(n): 첫 n개 행 출력 (기본값 5). df.tail(n): 마지막 n개 행 출력. df.shape: (행, 열) 크기 확인.",
+      "answerDisplay": "df = pd.read_csv('titanic.csv'); df.head(5)",
+      "code": "df = pd.read_csv('titanic.csv')\ndf.head(5)",
+      "explanation": "pd.read_csv()로 CSV 파일을 읽습니다. 파일명만 적으면 현재 디렉토리에서 찾습니다('titanic.csv'). df.head(n): 첫 n개 행 출력 (기본값 5). df.tail(n): 마지막 n개 행 출력. df.shape: (행, 열) 크기 확인.",
       "tip": "자주 나오는 오답: 'pd.read_csv(titanic.csv)' (따옴표 누락), 'df = read_csv(...)' (pd. 누락)."
     },
     {
