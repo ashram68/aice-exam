@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q6~Q9"},
     {"name": "AI 모델링", "points": 50, "range": "Q10~Q14"}
   ],
-  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import LabelEncoder, MaxAbsScaler\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\n# 데이터 로드\ndf = pd.read_csv('./telco_customer.csv')",
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import LabelEncoder, MaxAbsScaler\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\n\n# 데이터 로드\ndf = pd.read_csv('telco_customer.csv')",
   "questions": [
     {
       "id": 1,

@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q7~Q10"},
     {"name": "AI 모델링", "points": 40, "range": "Q11~Q14"}
   ],
-  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom scipy import stats\nfrom sklearn.impute import KNNImputer\nfrom sklearn.preprocessing import OneHotEncoder, PowerTransformer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error\n\n# 데이터 로드\ndf = pd.read_csv('./insurance_charges.csv')",
+  "prerequisiteCode": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom scipy import stats\nfrom sklearn.impute import KNNImputer\nfrom sklearn.preprocessing import OneHotEncoder, PowerTransformer\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error\n\n# 데이터 로드\ndf = pd.read_csv('insurance_charges.csv')",
   "questions": [
     {
       "id": 1,
