@@ -11,7 +11,7 @@
     {"name": "데이터 전처리", "points": 30, "range": "Q5~Q9"},
     {"name": "AI 모델링", "points": 40, "range": "Q10~Q15"}
   ],
-  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('titanic.csv')",
+  "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('titanic.csv')",
   "questions": [
     {
       "id": 1,
@@ -54,7 +54,7 @@
       "category": "데이터 분석",
       "points": 8,
       "type": "code",
-      "prerequisiteCode": "import numpy as np\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False",
+      "prerequisiteCode": "import numpy as np\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False",
       "problem": [
         "(3-1) seaborn의 countplot으로 객실 등급별 생존자 수 분포를 그래프로 그리세요.",
         "대상 데이터프레임: df",
@@ -64,7 +64,7 @@
       "choices": null,
       "answer": null,
       "answerDisplay": "(3-1) countplot 시각화 / (3-2) 1 (1등급)",
-      "code": "# (3-1) countplot 시각화\nsns.countplot(data=df, x='Pclass', hue='Survived')\nplt.show()\n\n# (3-2) 답안: 1 (1등급)\n# → 1등급 객실의 생존자가 사망자보다 많은 유일한 등급",
+      "code": "# (3-1) countplot 시각화\nimport seaborn as sns\nsns.countplot(data=df, x='Pclass', hue='Survived')\nplt.show()\n\n# (3-2) 답안: 1 (1등급)\n# → 1등급 객실의 생존자가 사망자보다 많은 유일한 등급",
       "explanation": "countplot은 범주형 데이터의 빈도(개수)를 막대그래프로 표시합니다. hue 옵션으로 범주별 색상 구분 가능. 분석 결과: 1등급(Pclass=1)은 생존율 약 63%, 2등급은 약 47%, 3등급은 약 24%. 객실 등급이 높을수록 생존율이 높았으며, 사회경제적 지위가 생존에 큰 영향을 미쳤음을 시사합니다.",
       "tip": "자주 나오는 오답: 'data=df' 명시 안 함, countplot 대신 barplot 사용(목적 다름). 1등급이 생존자 > 사망자인 유일한 등급입니다."
     },
@@ -270,7 +270,7 @@
       "category": "AI 모델링",
       "points": 8,
       "type": "code",
-      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Dense, Dropout, Input\nfrom tensorflow.keras.callbacks import EarlyStopping\ntf.random.set_seed(42)\nnp.random.seed(42)",
+      "prerequisiteCode": "import tensorflow as tf\nfrom tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Input, Dense, Dropout\nfrom tensorflow.keras.callbacks import EarlyStopping\ntf.random.set_seed(42)\nnp.random.seed(42)",
       "problem": [
         "아래 토폴로지와 가이드를 참고해서 모델링하고 학습을 수행하세요.",
         "모델 토폴로지: 입력층 → Dense(64, relu) → Dropout(0.3) → Dense(32, relu) → Dense(16, relu) → Dense(1, sigmoid)",
