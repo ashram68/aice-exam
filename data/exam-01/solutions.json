@@ -326,24 +326,27 @@
       "points": 9,
       "type": "code",
       "problem": [
-        "새로운 승객 정보: 3등급 객실의 25세 남성, 가족 없이 혼자 탑승, 운임 10.5, Southampton 항구",
-        "컬럼 순서: ['Pclass', 'Age', 'SibSp', 'Parch', 'Fare', 'Gender_male', 'Embarked_Q', 'Embarked_S']",
-        "new_passenger = np.array([[3, 25, 0, 0, 10.5, 1, 0, 1]])  (shape=(1, 8) 2차원)",
-        "주어진 new_passenger를 그대로 사용",
-        "훈련 데이터에서 학습한 ss 스케일러로 변환 (⚠ fit_transform 사용 금지)",
-        "변환 배열은 new_scaled 변수에 저장",
-        "model로 생존 확률 예측 → pred_prob 변수",
-        "pred_prob를 0.5 기준으로 예측 클래스(0/1)로 변환 → pred_class 변수 (sigmoid)",
+        "학습한 딥러닝 모델로 새로운 승객 1명의 생존 여부를 예측(시뮬레이션)하세요. 신규 승객: 3등급 객실의 25세 남성, 가족 없이 혼자 탑승, 운임 10.5, Southampton 항구.",
+        "위에 주어진 new_passenger(NumPy 2차원 배열, shape=(1, 8))을 그대로 사용하세요",
+        "훈련 데이터에서 학습한 ss 스케일러로 변환하세요 (⚠ fit_transform 사용 금지)",
+        "변환된 배열은 new_scaled 변수에 저장하세요",
+        "학습된 model로 생존 확률을 예측하여 pred_prob 변수에 저장하세요",
+        "pred_prob를 0.5 기준으로 예측 클래스(0/1)로 변환하여 pred_class 변수에 저장하세요 (출력층이 sigmoid)",
         "이 승객의 예측 클래스(0 또는 1)를 답하세요 ← 채점되는 정답",
-        "출력 형식: 예측 클래스(0/1, 채점 대상), 생존 확률(소수점 4자리, 참고값), 메시지(생존 또는 사망)",
-        "※ 생존 확률은 실행 환경마다 미세하게 달라지므로, 정답은 예측 클래스(0/1)로 판정합니다."
+        "예측 결과를 다음 형식으로 출력하세요:",
+        "— 예측 클래스 (0 또는 1) ← 채점 대상",
+        "— 생존 확률 (소수점 4자리) ← 참고값",
+        "— 예측 클래스가 1이면 \"이 승객은 생존할 것으로 예측됩니다.\", 0이면 \"이 승객은 사망할 것으로 예측됩니다.\"",
+        "※ 생존 확률은 실행 환경마다 미세하게 달라지므로, 정답은 예측 클래스(0/1)로 판정합니다.",
+        "[제공 코드] 컬럼 순서: [Pclass, Age, SibSp, Parch, Fare, Gender_male, Embarked_Q, Embarked_S]",
+        "[제공 코드] new_passenger = np.array([[3, 25, 0, 0, 10.5, 1, 0, 1]])"
       ],
       "choices": null,
       "answer": null,
       "answerDisplay": "예측 클래스 0 (사망) ← 채점 정답 / 생존 확률 ≈ 0.11 (참고값, 환경마다 변동)",
-      "code": "# 1. 스케일링 (훈련 데이터에서 학습한 스케일러로 변환 — transform만!)\nnew_scaled = ss.transform(new_passenger)\n\n# 2. 예측 확률 산출 (sigmoid 출력층 → 0~1)\npred_prob = model.predict(new_scaled)\n\n# 3. 확률 → 클래스 변환 (0.5 기준)\npred_class = (pred_prob >= 0.5).astype(int)\n\n# 4. 결과 출력 (예측 클래스 = 채점 대상, 생존 확률 = 참고값)\nprint(f'예측 클래스: {pred_class[0][0]}')          # 정답(채점 대상)\nprint(f'생존 확률(참고): {pred_prob[0][0]:.4f}')\nif pred_class[0][0] == 1:\n    print('이 승객은 생존할 것으로 예측됩니다.')\nelse:\n    print('이 승객은 사망할 것으로 예측됩니다.')\n\n# 예상 출력:\n# 예측 클래스: 0\n# 생존 확률(참고): 약 0.11 (실행 환경마다 변동)\n# 이 승객은 사망할 것으로 예측됩니다.",
-      "explanation": "3등급 남성 + 가족 없음 + 낮은 운임 — 변수중요도와 일치하는 저생존 프로필(Gender_male=1·3등급·낮은 운임 모두 생존율 낮음). 핵심 체크: (1) 입력은 2차원 배열 [[...]] (1차원이면 'Expected 2D array' 오류), (2) 컬럼 순서 정확히(NumPy는 순서로만 매핑), (3) 스케일링은 transform만(fit_transform 금지 — 신규 데이터로 기준을 다시 학습하면 안 됨), (4) sigmoid는 0.5 기준 클래스 변환. ⚠ 정답을 \"예측 클래스\"로 두는 이유: 딥러닝은 가중치 초기화·Dropout 등 무작위 요소가 있어 시드를 고정해도 TensorFlow 버전·하드웨어(CPU/GPU)·실행 환경이 다르면 생존 확률의 소수점 아래가 조금씩 바뀝니다(대략 0.11~0.13). 반면 이 승객은 확률이 0.5보다 충분히 낮아 예측 클래스는 어느 환경에서도 항상 0(사망)으로 동일합니다. 그래서 변동되는 확률값이 아니라 안정적인 예측 클래스(0/1)를 정답으로 채점합니다.",
-      "tip": "자주 나오는 오답: np.array([3,25,...]) 1차원 → ValueError, ss.fit_transform(new_passenger) → 학습 기준 무시, 컬럼 순서 잘못 → 완전히 다른 결과. 확률→클래스: sigmoid → (prob >= 0.5).astype(int), softmax → np.argmax(prob, axis=1). 같은 입력을 컬럼명 붙인 DataFrame으로 만들어도 동일하게 예측됨: pd.DataFrame([[3,25,0,0,10.5,1,0,1]], columns=X.columns) 후 ss.transform. 재현성을 높이려면 PYTHONHASHSEED·random.seed·np.random.seed·tf.random.set_seed(42)·tf.config.experimental.enable_op_determinism() 설정(그래도 환경 차이는 남을 수 있어 정답은 클래스로 판정)."
+      "code": "new_scaled = ss.transform(new_passenger)        # ⚠ transform만\npred_prob  = model.predict(new_scaled)          # 생존 확률(0~1)\npred_class = (pred_prob >= 0.5).astype(int)     # 확률 → 클래스\nprint(f\"예측 클래스: {pred_class[0][0]}\")         # 정답(채점 대상)\nprint(f\"생존 확률(참고): {pred_prob[0][0]:.4f}\")\nif pred_class[0][0] == 1:\n    print(\"이 승객은 생존할 것으로 예측됩니다.\")\nelse:\n    print(\"이 승객은 사망할 것으로 예측됩니다.\")\n# 예측 클래스: 0 → 이 승객은 사망할 것으로 예측됩니다.  (생존 확률 ≈ 0.11, 참고)\n\n\n# ── 동일 역할 코드 (DataFrame으로 예측) ──\n# NumPy 배열 대신 컬럼명을 붙인 DataFrame으로 만들어도 동일하게 예측됩니다.\n# 핵심은 컬럼 순서·개수가 X.columns와 같아야 한다는 점이며, 예측 클래스 결과는 배열 방식과 같습니다.\nnew_df = pd.DataFrame([[3, 25, 0, 0, 10.5, 1, 0, 1]], columns=X.columns)\nnew_scaled = ss.transform(new_df)               # ⚠ transform만\npred_prob  = model.predict(new_scaled)\npred_class = (pred_prob >= 0.5).astype(int)     # 결과(클래스)는 배열 방식과 동일\n\n\n# ── 재현성(reproducibility) 정리 ──\nimport os, random\nos.environ[\"PYTHONHASHSEED\"] = \"42\"\nrandom.seed(42)\nnp.random.seed(42)\ntf.random.set_seed(42)\ntf.config.experimental.enable_op_determinism()   # TF 2.9+ GPU 비결정성 제거",
+      "explanation": "[코드 해설] new_passenger = np.array([[3,25,0,0,10.5,1,0,1]]) : 신규 승객 1명을 2차원 배열(1행 8열)로 — 컬럼 순서는 X.columns와 동일(Pclass, Age, SibSp, Parch, Fare, Gender_male, Embarked_Q, Embarked_S). ss.transform(new_passenger) : 훈련에서 학습한 평균·표준편차로만 스케일링. ⚠ fit_transform 금지(신규 데이터로 기준을 다시 학습하면 안 됨). model.predict(new_scaled) : sigmoid 출력이라 생존 확률(0~1)을 반환 → pred_prob (참고용 값). (pred_prob >= 0.5).astype(int) : 0.5 기준으로 1(생존)/0(사망) 클래스로 변환 → pred_class. 이 클래스가 바로 15번의 정답. print(...) : 예측 클래스를 먼저 출력(채점 대상), 생존 확률은 소수 4자리로 참고 출력. if pred_class[0][0]==1: ... else: ... : 클래스가 1이면 생존, 0이면 사망 메시지를 분기 출력. 같은 환경(동일 PC·TF 버전·하드웨어)에서 시드를 고정하면, 다시 실행해도 항상 같은 확률값이 나옵니다. 다른 환경(TF 버전·CPU/GPU·OS가 다름)에서는 시드가 같아도 부동소수점·병렬 연산 차이로 소수점 아래가 달라질 수 있습니다. 예측 클래스는 확률이 0.5에서 충분히 떨어져 있어 환경과 무관하게 0(사망)으로 고정됩니다. [정답] 예측 클래스 : 0 (사망). 생존 확률 ≈ 0.11 — 참고값(실행 환경마다 변동되어 채점 대상 아님). [⚠ 정답을 예측 클래스로 두는 이유] 딥러닝은 가중치 초기화·Dropout 등 무작위 요소가 있어, 시드를 고정해도 TensorFlow 버전·하드웨어(CPU/GPU)·실행 환경이 다르면 생존 확률의 소수점 아래가 조금씩 바뀝니다(대략 0.11~0.13). 반면 이 승객은 확률이 0.5보다 충분히 낮아 예측 클래스는 어느 환경에서도 항상 0(사망)으로 동일합니다. 그래서 변동되는 확률값이 아니라 안정적인 예측 클래스(0/1)를 정답으로 채점합니다. (머신러닝 모델 DecisionTree·RandomForest는 random_state=42로 항상 같은 값)",
+      "tip": "자주 나오는 오답: np.array([3,25,...]) 1차원 → ValueError(Expected 2D array), ss.fit_transform(new_passenger) → 학습 기준 무시, 컬럼 순서 오류 → 완전히 다른 결과. 확률→클래스: sigmoid → (prob >= 0.5).astype(int), softmax → np.argmax(prob, axis=1)."
     }
   ]
 }
