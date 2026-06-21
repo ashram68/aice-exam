@@ -7,9 +7,21 @@
   "targetVariable": "Survived (0=사망, 1=생존)",
   "totalPoints": 100,
   "sections": [
-    {"name": "데이터 분석", "points": 30, "range": "Q1~Q4"},
-    {"name": "데이터 전처리", "points": 30, "range": "Q5~Q9"},
-    {"name": "AI 모델링", "points": 40, "range": "Q10~Q15"}
+    {
+      "name": "데이터 분석",
+      "points": 30,
+      "range": "Q1~Q4"
+    },
+    {
+      "name": "데이터 전처리",
+      "points": 30,
+      "range": "Q5~Q9"
+    },
+    {
+      "name": "AI 모델링",
+      "points": 40,
+      "range": "Q10~Q15"
+    }
   ],
   "prerequisiteCode": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 한글 폰트 설정 (Colab 환경)\nimport matplotlib as mpl\nimport matplotlib.font_manager as fm\ntry:\n    font_path = 'C:\\\\Windows\\\\Fonts\\\\malgun.ttf'\n    font = fm.FontProperties(fname=font_path).get_name()\n    mpl.rc('font', family=font)\nexcept:\n    pass\nplt.rcParams['axes.unicode_minus'] = False\n\n# 데이터 로드\ndf = pd.read_csv('titanic.csv')",
   "questions": [
@@ -127,7 +139,7 @@
       "choices": null,
       "answer": null,
       "answerDisplay": "(6-1) median() / mode()[0]로 정정 / (6-2) 28.0",
-      "code": "# (6-1) 오류 정정\nprint('결측치 처리 전\\n', data_temp.isnull().sum())\ndata_temp['Age'] = data_temp['Age'].fillna(data_temp['Age'].median())\ndata_temp['Embarked'] = data_temp['Embarked'].fillna(data_temp['Embarked'].mode()[0])\nprint('\\n결측치 처리 후\\n', data_temp.isnull().sum())\n\n# (6-2) 답안: 28.0",
+      "code": "# (6-1) 오류 정정\nprint('결측치 처리 전\\n', data_temp.isnull().sum())\ndata_temp['Age'] = data_temp['Age'].fillna(data_temp['Age'].median())\ndata_temp['Embarked'] = data_temp['Embarked'].fillna(data_temp['Embarked'].mode()[0])\nprint('\\n결측치 처리 후\\n', data_temp.isnull().sum())\n\n# (6-2) 답안: data_temp[\"Age\"].median(), 28.0",
       "explanation": "결측치 처리 핵심: mean()은 이상치에 민감해서 정규분포일 때 적합, median()은 강건(robust)해서 이상치가 있을 때 적합, mode()[0]은 범주형 변수에 적합(반드시 [0] 필요). mode()는 Series를 반환(최빈값이 여러 개일 수 있어서) — 반드시 mode()[0]으로 첫 번째 값을 추출해야 fillna가 제대로 동작합니다.",
       "tip": "mode()[0]의 [0]을 자주 빠뜨리는 시험 단골 출제 포인트. 시험 빈출 패턴: 컬럼 dtype별 차등 처리 (object → mode()[0], 수치형 → mean/median)."
     },
@@ -321,15 +333,17 @@
         "훈련 데이터에서 학습한 ss 스케일러로 변환 (⚠ fit_transform 사용 금지)",
         "변환 배열은 new_scaled 변수에 저장",
         "model로 생존 확률 예측 → pred_prob 변수",
-        "확률을 클래스로 변환 → pred_class 변수 (sigmoid이므로 0.5 기준)",
-        "출력 형식: 생존 확률(소수점 4자리), 예측 클래스(0/1), 메시지(생존 또는 사망)"
+        "pred_prob를 0.5 기준으로 예측 클래스(0/1)로 변환 → pred_class 변수 (sigmoid)",
+        "이 승객의 예측 클래스(0 또는 1)를 답하세요 ← 채점되는 정답",
+        "출력 형식: 예측 클래스(0/1, 채점 대상), 생존 확률(소수점 4자리, 참고값), 메시지(생존 또는 사망)",
+        "※ 생존 확률은 실행 환경마다 미세하게 달라지므로, 정답은 예측 클래스(0/1)로 판정합니다."
       ],
       "choices": null,
       "answer": null,
-      "answerDisplay": "생존 확률 약 0.13(13%), 예측 클래스 0 (사망)",
-      "code": "# 1. 스케일링 (훈련 데이터에서 학습한 스케일러로 변환 — transform만!)\nnew_scaled = ss.transform(new_passenger)\n\n# 2. 예측 확률 산출\npred_prob = model.predict(new_scaled)\n\n# 3. 확률 → 클래스 변환 (sigmoid 출력층이므로 0.5 기준)\npred_class = (pred_prob >= 0.5).astype(int)\n\n# 4. 결과 출력\nprint(f'생존 확률: {pred_prob[0][0]:.4f}')\nprint(f'예측 클래스: {pred_class[0][0]}')\nif pred_class[0][0] == 1:\n    print('이 승객은 생존할 것으로 예측됩니다.')\nelse:\n    print('이 승객은 사망할 것으로 예측됩니다.')\n\n# 예상 출력:\n# 생존 확률: 0.1260\n# 예측 클래스: 0\n# 이 승객은 사망할 것으로 예측됩니다.",
-      "explanation": "3등급 남성 + 가족 없음 + 낮은 운임 — 변수중요도와 일치하는 저생존 프로필(Gender_male=1 → 생존율 낮음, 3등급 → 낮음, 낮은 운임 → 낮음). 핵심 체크: (1) 입력은 2차원 배열 [[...]] (1차원 금지 → 'Expected 2D array' 오류), (2) 컬럼 순서 정확히 (NumPy는 순서로만 매핑), (3) 스케일링은 transform만 (fit_transform 절대 금지), (4) sigmoid는 0.5 기준 클래스 변환.",
-      "tip": "자주 나오는 오답: np.array([3,25,...]) 1차원 → ValueError, ss.fit_transform(new_passenger) → 학습 기준 무시, 컬럼 순서 잘못 → 완전히 다른 결과. 확률→클래스: sigmoid → (prob >= 0.5).astype(int), softmax → np.argmax(prob, axis=1)."
+      "answerDisplay": "예측 클래스 0 (사망) ← 채점 정답 / 생존 확률 ≈ 0.11 (참고값, 환경마다 변동)",
+      "code": "# 1. 스케일링 (훈련 데이터에서 학습한 스케일러로 변환 — transform만!)\nnew_scaled = ss.transform(new_passenger)\n\n# 2. 예측 확률 산출 (sigmoid 출력층 → 0~1)\npred_prob = model.predict(new_scaled)\n\n# 3. 확률 → 클래스 변환 (0.5 기준)\npred_class = (pred_prob >= 0.5).astype(int)\n\n# 4. 결과 출력 (예측 클래스 = 채점 대상, 생존 확률 = 참고값)\nprint(f'예측 클래스: {pred_class[0][0]}')          # 정답(채점 대상)\nprint(f'생존 확률(참고): {pred_prob[0][0]:.4f}')\nif pred_class[0][0] == 1:\n    print('이 승객은 생존할 것으로 예측됩니다.')\nelse:\n    print('이 승객은 사망할 것으로 예측됩니다.')\n\n# 예상 출력:\n# 예측 클래스: 0\n# 생존 확률(참고): 약 0.11 (실행 환경마다 변동)\n# 이 승객은 사망할 것으로 예측됩니다.",
+      "explanation": "3등급 남성 + 가족 없음 + 낮은 운임 — 변수중요도와 일치하는 저생존 프로필(Gender_male=1·3등급·낮은 운임 모두 생존율 낮음). 핵심 체크: (1) 입력은 2차원 배열 [[...]] (1차원이면 'Expected 2D array' 오류), (2) 컬럼 순서 정확히(NumPy는 순서로만 매핑), (3) 스케일링은 transform만(fit_transform 금지 — 신규 데이터로 기준을 다시 학습하면 안 됨), (4) sigmoid는 0.5 기준 클래스 변환. ⚠ 정답을 \"예측 클래스\"로 두는 이유: 딥러닝은 가중치 초기화·Dropout 등 무작위 요소가 있어 시드를 고정해도 TensorFlow 버전·하드웨어(CPU/GPU)·실행 환경이 다르면 생존 확률의 소수점 아래가 조금씩 바뀝니다(대략 0.11~0.13). 반면 이 승객은 확률이 0.5보다 충분히 낮아 예측 클래스는 어느 환경에서도 항상 0(사망)으로 동일합니다. 그래서 변동되는 확률값이 아니라 안정적인 예측 클래스(0/1)를 정답으로 채점합니다.",
+      "tip": "자주 나오는 오답: np.array([3,25,...]) 1차원 → ValueError, ss.fit_transform(new_passenger) → 학습 기준 무시, 컬럼 순서 잘못 → 완전히 다른 결과. 확률→클래스: sigmoid → (prob >= 0.5).astype(int), softmax → np.argmax(prob, axis=1). 같은 입력을 컬럼명 붙인 DataFrame으로 만들어도 동일하게 예측됨: pd.DataFrame([[3,25,0,0,10.5,1,0,1]], columns=X.columns) 후 ss.transform. 재현성을 높이려면 PYTHONHASHSEED·random.seed·np.random.seed·tf.random.set_seed(42)·tf.config.experimental.enable_op_determinism() 설정(그래도 환경 차이는 남을 수 있어 정답은 클래스로 판정)."
     }
   ]
 }
